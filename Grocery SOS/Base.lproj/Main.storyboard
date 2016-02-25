@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9532" systemVersion="15D21" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="IF0-bU-L3t">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9530"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+    </dependencies>
+    <scenes>
+        <!--Grocery SOS-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <viewController id="BYZ-38-t0r" customClass="GroceryListViewController" customModule="Grocery_SOS" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="y3c-jy-aDJ"/>
+                        <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <searchBar contentMode="redraw" placeholder="Grocery item" showsCancelButton="YES" translatesAutoresizingMaskIntoConstraints="NO" id="LAa-wx-UFE">
+                                <rect key="frame" x="20" y="64" width="560" height="44"/>
+                                <textInputTraits key="textInputTraits"/>
+                                <scopeButtonTitles>
+                                    <string>Title</string>
+                                    <string>Title</string>
+                                </scopeButtonTitles>
+                                <connections>
+                                    <outlet property="delegate" destination="BYZ-38-t0r" id="xnv-zx-YO1"/>
+                                </connections>
+                            </searchBar>
+                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3kp-O6-cyQ">
+                                <rect key="frame" x="20" y="556" width="560" height="44"/>
+                                <items>
+                                    <barButtonItem title="Log In" id="opG-vP-9F8"/>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="EKu-3S-UVH"/>
+                                    <barButtonItem title="Profile" id="SNa-Z0-qpk"/>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="0qi-lU-ldc"/>
+                                    <barButtonItem title="Manager" id="J0p-B7-Y6l"/>
+                                </items>
+                            </toolbar>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="vqD-r3-GRc">
+                                <rect key="frame" x="0.0" y="0.0" width="240" height="128"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <connections>
+                                    <outlet property="dataSource" destination="BYZ-38-t0r" id="gdt-lf-CvI"/>
+                                    <outlet property="delegate" destination="BYZ-38-t0r" id="dfV-wC-DRk"/>
+                                </connections>
+                            </tableView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="3kp-O6-cyQ" secondAttribute="bottom" id="0a3-sD-gdR"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="3kp-O6-cyQ" secondAttribute="trailing" id="17k-ZN-zsl"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="LAa-wx-UFE" secondAttribute="trailing" id="4wA-xv-EKG"/>
+                            <constraint firstItem="3kp-O6-cyQ" firstAttribute="top" secondItem="vqD-r3-GRc" secondAttribute="bottom" id="5FJ-Ie-TB6"/>
+                            <constraint firstItem="vqD-r3-GRc" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="APf-uh-wnV"/>
+                            <constraint firstItem="vqD-r3-GRc" firstAttribute="top" secondItem="LAa-wx-UFE" secondAttribute="bottom" id="C0o-rQ-p4h"/>
+                            <constraint firstItem="LAa-wx-UFE" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="G4e-Lv-isc"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="vqD-r3-GRc" secondAttribute="trailing" id="OgR-ja-1sz"/>
+                            <constraint firstItem="3kp-O6-cyQ" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="SaB-3J-nRP"/>
+                            <constraint firstItem="LAa-wx-UFE" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" id="bgX-aI-tqs"/>
+                        </constraints>
+                        <variation key="default">
+                            <mask key="subviews">
+                                <exclude reference="vqD-r3-GRc"/>
+                            </mask>
+                            <mask key="constraints">
+                                <exclude reference="APf-uh-wnV"/>
+                                <exclude reference="C0o-rQ-p4h"/>
+                                <exclude reference="OgR-ja-1sz"/>
+                                <exclude reference="5FJ-Ie-TB6"/>
+                            </mask>
+                        </variation>
+                        <variation key="widthClass=compact">
+                            <mask key="subviews">
+                                <include reference="vqD-r3-GRc"/>
+                            </mask>
+                            <mask key="constraints">
+                                <include reference="APf-uh-wnV"/>
+                                <include reference="C0o-rQ-p4h"/>
+                                <include reference="OgR-ja-1sz"/>
+                                <include reference="5FJ-Ie-TB6"/>
+                            </mask>
+                        </variation>
+                    </view>
+                    <navigationItem key="navigationItem" title="Grocery SOS" id="Mlo-wt-w1O">
+                        <barButtonItem key="leftBarButtonItem" title="Cancel" id="dXK-ru-8Lb"/>
+                        <barButtonItem key="rightBarButtonItem" title="Done" id="TdE-Q8-3zo"/>
+                    </navigationItem>
+                    <connections>
+                        <outlet property="searchBar" destination="LAa-wx-UFE" id="vS2-HU-jdh"/>
+                        <outlet property="searchTable" destination="vqD-r3-GRc" id="Ff4-A0-EEd"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1057" y="309"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="DQe-vu-dBi">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="IF0-bU-L3t" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="xMj-wC-Z0B">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="BYZ-38-t0r" kind="relationship" relationship="rootViewController" id="hG1-2w-NR2"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="aWk-GQ-hsd" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="69" y="309"/>
+        </scene>
+    </scenes>
+</document>
