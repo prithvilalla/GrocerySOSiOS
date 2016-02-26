@@ -12,10 +12,12 @@ class GroceryItem: NSObject {
     
     var name: String = ""
     var checkmark: Bool = false
+    var category: String = ""
     
-    init(name: String, checkmark: Bool = false) {
+    init(name: String, checkmark: Bool = false, category: String = "Miscellaneous") {
         self.name = name
         self.checkmark = checkmark
+        self.category = category
     }
     
     func equalTo(target: GroceryItem) -> Bool {

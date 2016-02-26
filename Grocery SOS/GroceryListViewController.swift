@@ -16,16 +16,23 @@ class GroceryListViewController: UIViewController {
     var items = [GroceryItem]()
     var searchResults = [GroceryItem]()
     var checkedItems = [GroceryItem]()
+    var categories = [String]()
     var hasSearched = false
     let emptySearchMessage = "(Nothing found)"
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        items.append(GroceryItem(name: "Milk"))
-        items.append(GroceryItem(name: "Meat"))
-        items.append(GroceryItem(name: "Cheese"))
-        items.append(GroceryItem(name: "Bread"))
-        items.append(GroceryItem(name: "Vegetables"))
+        items.append(GroceryItem(name: "Milk", category: "Dairy"))
+        items.append(GroceryItem(name: "Cheese", category: "Dairy"))
+        items.append(GroceryItem(name: "Chicken", category: "Meat"))
+        items.append(GroceryItem(name: "Beef", category: "Meat"))
+        items.append(GroceryItem(name: "Bread", category: "Bakery"))
+        items.append(GroceryItem(name: "Tomato", category: "Vegetables"))
+        items.append(GroceryItem(name: "Onion", category: "Vegetables"))
+        items.append(GroceryItem(name: "Apple", category: "Fruits"))
+        items.append(GroceryItem(name: "Banana", category: "Fruits"))
+        items.append(GroceryItem(name: "Coke Zero", category: "Beverages"))
+        items.append(GroceryItem(name: "Beer", category: "Beverages"))
         // Do any additional setup after loading the view.
     }
 
@@ -55,6 +62,36 @@ class GroceryListViewController: UIViewController {
                 break
             }
         }
+    }
+    
+    func constructCategories(searchArray: [GroceryItem]) {
+        categories.removeAll(keepCapacity: false)
+        for item in searchArray {
+            if !categories.contains(item.category) {
+                categories.append(item.category)
+            }
+        }
+    }
+    
+    func numberOfRowsPerSection(searchArray: [GroceryItem], section: Int) -> Int {
+        var count = 0
+        for item in searchArray {
+            if item.category == categories[section] {
+                count++
+            }
+        }
+        return count
+    }
+    
+    func positionInArray(searchArray: [GroceryItem], indexPath: NSIndexPath) -> Int {
+        let category = categories[indexPath.section]
+        var positions = [Int]()
+        for i in 0...(searchArray.count - 1) {
+            if category == searchArray[i].category {
+                positions.append(i)
+            }
+        }
+        return positions[indexPath.row]
     }
 
     /*
@@ -106,23 +143,22 @@ extension GroceryListViewController: UITableViewDataSource {
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cellIdentifier = "TableViewCell"
-        var cell: UITableViewCell! = tableView.dequeueReusableCellWithIdentifier(cellIdentifier)
-        if cell == nil {
-            cell = UITableViewCell(style: .Default, reuseIdentifier: cellIdentifier)
-        }
+        let cell: UITableViewCell! = tableView.dequeueReusableCellWithIdentifier(cellIdentifier)
         if hasSearched {
             if searchResults.count == 0 {
                 cell.textLabel!.text = emptySearchMessage
             } else {
-                cell.textLabel!.text = searchResults[indexPath.row].name
-                if searchResults[indexPath.row].checkmark {
+                let position = positionInArray(searchResults, indexPath: indexPath)
+                cell.textLabel!.text = searchResults[position].name
+                if searchResults[position].checkmark {
                     cell.accessoryType = .Checkmark
                 } else {
                     cell.accessoryType = .None
                 }
             }
         } else {
-            cell.textLabel!.text = checkedItems[indexPath.row].name
+            let position = positionInArray(checkedItems, indexPath: indexPath)
+            cell.textLabel!.text = checkedItems[position].name
             cell.accessoryType = .Checkmark
         }
         return cell
@@ -130,13 +166,32 @@ extension GroceryListViewController: UITableViewDataSource {
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if hasSearched {
-            if searchResults.count == 0 && hasSearched {
+            if searchResults.count == 0 {
                 return 1
+            } else {
+                return numberOfRowsPerSection(searchResults, section: section)
             }
-            return searchResults.count
         } else {
-            return checkedItems.count
+            return numberOfRowsPerSection(checkedItems, section: section)
         }
+    }
+    
+    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+        if hasSearched {
+            if searchResults.count == 0 {
+                return 1
+            } else {
+                constructCategories(searchResults)
+                return categories.count
+            }
+        } else {
+            constructCategories(checkedItems)
+            return categories.count < 1 ? 1 : categories.count
+        }
+    }
+    
+    func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        return categories.count != 0 &&  !(searchResults.count == 0 && hasSearched) ? categories[section] : nil
     }
     
 }
@@ -152,13 +207,24 @@ extension GroceryListViewController: UITableViewDelegate {
         tableView.reloadData()
     }
     
-    func tableView(tableView: UITableView, didDeselectRowAtIndexPath indexPath: NSIndexPath) {
+    func tableView(tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        let cellIdentifier = "HeaderViewCell"
+        let cell: UITableViewCell! = tableView.dequeueReusableCellWithIdentifier(cellIdentifier)
+        if categories.count != 0 && !(searchResults.count == 0 && hasSearched) {
+            cell.textLabel!.text = categories[section]
+            cell.textLabel!.textColor = UIColor.whiteColor()
+            return cell
+        }
+        return nil
     }
+    
     
 }
 
 extension String {
+    
     func contains(find: String) -> Bool {
         return self.lowercaseString.hasPrefix(find.lowercaseString)
     }
+    
 }
