@@ -8,7 +8,7 @@
 
 import UIKit
 
-class GroceryListViewController: UIViewController {
+class GroceryListViewController: UIViewController, RoutePreviewViewControllerDelegate {
     
     @IBOutlet weak var searchBar: UISearchBar!
     @IBOutlet weak var searchTable: UITableView!
@@ -57,7 +57,7 @@ class GroceryListViewController: UIViewController {
     
     func removeCheckedItem(target: GroceryItem) {
         for i in 0...(checkedItems.count - 1) {
-            if checkedItems[i].equalTo(target) {
+            if checkedItems[i] == target {
                 checkedItems.removeAtIndex(i)
                 break
             }
@@ -93,6 +93,10 @@ class GroceryListViewController: UIViewController {
         }
         return positions[indexPath.row]
     }
+    
+    func routerPreviewViewControllerDidCancel(controller: RoutePreviewViewController) {
+        dismissViewControllerAnimated(true, completion: nil)
+    }
 
     /*
     // MARK: - Navigation
@@ -103,6 +107,14 @@ class GroceryListViewController: UIViewController {
         // Pass the selected object to the new view controller.
     }
     */
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if segue.identifier == "routePreview" {
+            let navigationController = segue.destinationViewController as! UINavigationController
+            let controller = navigationController.topViewController as! RoutePreviewViewController
+            controller.delegate = self
+        }
+    }
 
 }
 

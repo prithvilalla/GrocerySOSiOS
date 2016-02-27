@@ -102,8 +102,12 @@
                         </variation>
                     </view>
                     <navigationItem key="navigationItem" title="Grocery SOS" id="Mlo-wt-w1O">
-                        <barButtonItem key="leftBarButtonItem" title="Cancel" id="dXK-ru-8Lb"/>
-                        <barButtonItem key="rightBarButtonItem" title="Done" id="TdE-Q8-3zo"/>
+                        <barButtonItem key="leftBarButtonItem" systemItem="cancel" id="dXK-ru-8Lb"/>
+                        <barButtonItem key="rightBarButtonItem" systemItem="done" id="TdE-Q8-3zo">
+                            <connections>
+                                <segue destination="NJ7-Ub-feX" kind="presentation" identifier="routePreview" id="Alv-xF-PY0"/>
+                            </connections>
+                        </barButtonItem>
                     </navigationItem>
                     <connections>
                         <outlet property="searchBar" destination="LAa-wx-UFE" id="vS2-HU-jdh"/>
@@ -113,6 +117,31 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1057" y="309"/>
+        </scene>
+        <!--Route Preview-->
+        <scene sceneID="KKV-6v-gXF">
+            <objects>
+                <viewController id="dxu-6y-sBT" customClass="RoutePreviewViewController" customModule="Grocery_SOS" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="Mf2-74-Asz"/>
+                        <viewControllerLayoutGuide type="bottom" id="6iM-If-HBz"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="Apz-VG-vQs">
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </view>
+                    <navigationItem key="navigationItem" title="Route Preview" id="DH0-jJ-RNG">
+                        <barButtonItem key="leftBarButtonItem" title="Cancel" id="7jR-jn-RSn">
+                            <connections>
+                                <action selector="cancel" destination="dxu-6y-sBT" id="M3O-XG-kr6"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem key="rightBarButtonItem" title="Navigate" id="eah-Fx-jge"/>
+                    </navigationItem>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="iuT-fm-FK8" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="3099" y="309"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="DQe-vu-dBi">
@@ -131,6 +160,24 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="aWk-GQ-hsd" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="69" y="309"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="fI1-z7-ZNR">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="NJ7-Ub-feX" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="iPj-Tc-c6T">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="dxu-6y-sBT" kind="relationship" relationship="rootViewController" id="KpV-or-bLc"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="zlR-gF-LCz" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2157" y="309"/>
         </scene>
     </scenes>
 </document>

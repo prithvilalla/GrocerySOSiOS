@@ -20,7 +20,8 @@ class GroceryItem: NSObject {
         self.category = category
     }
     
-    func equalTo(target: GroceryItem) -> Bool {
-        return self.name == target.name
-    }
+}
+
+func == (lhs: GroceryItem, rhs: GroceryItem ) -> Bool {
+    return lhs.name == rhs.name
 }

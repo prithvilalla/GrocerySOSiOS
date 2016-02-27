@@ -13,6 +13,7 @@
 		59494F2F1C7D72E80085AF62 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 59494F2D1C7D72E80085AF62 /* LaunchScreen.storyboard */; };
 		59494F371C7D77130085AF62 /* GroceryListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59494F361C7D77130085AF62 /* GroceryListViewController.swift */; };
 		59494F391C7E82460085AF62 /* GroceryItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59494F381C7E82460085AF62 /* GroceryItem.swift */; };
+		59494F3B1C8255D50085AF62 /* RoutePreviewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59494F3A1C8255D50085AF62 /* RoutePreviewViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +25,7 @@
 		59494F301C7D72E80085AF62 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		59494F361C7D77130085AF62 /* GroceryListViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GroceryListViewController.swift; sourceTree = "<group>"; };
 		59494F381C7E82460085AF62 /* GroceryItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GroceryItem.swift; sourceTree = "<group>"; };
+		59494F3A1C8255D50085AF62 /* RoutePreviewViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoutePreviewViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,6 +64,7 @@
 				59494F2D1C7D72E80085AF62 /* LaunchScreen.storyboard */,
 				59494F301C7D72E80085AF62 /* Info.plist */,
 				59494F361C7D77130085AF62 /* GroceryListViewController.swift */,
+				59494F3A1C8255D50085AF62 /* RoutePreviewViewController.swift */,
 				59494F381C7E82460085AF62 /* GroceryItem.swift */,
 			);
 			path = "Grocery SOS";
@@ -140,6 +143,7 @@
 			files = (
 				59494F371C7D77130085AF62 /* GroceryListViewController.swift in Sources */,
 				59494F391C7E82460085AF62 /* GroceryItem.swift in Sources */,
+				59494F3B1C8255D50085AF62 /* RoutePreviewViewController.swift in Sources */,
 				59494F251C7D72E80085AF62 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
