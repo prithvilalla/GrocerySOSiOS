@@ -36,7 +36,11 @@
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="EKu-3S-UVH"/>
                                     <barButtonItem title="Profile" id="SNa-Z0-qpk"/>
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="0qi-lU-ldc"/>
-                                    <barButtonItem title="Manager" id="J0p-B7-Y6l"/>
+                                    <barButtonItem title="Manager" id="J0p-B7-Y6l">
+                                        <connections>
+                                            <action selector="managerMode" destination="BYZ-38-t0r" id="0ou-fz-NF6"/>
+                                        </connections>
+                                    </barButtonItem>
                                 </items>
                             </toolbar>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="vqD-r3-GRc">
@@ -50,7 +54,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                         </tableViewCellContentView>
                                     </tableViewCell>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="HeaderViewCell" id="l2U-p3-tJ5">
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="HeaderViewCell" id="l2U-p3-tJ5">
                                         <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="l2U-p3-tJ5" id="JnA-s1-MrD">
@@ -103,20 +107,52 @@
                     </view>
                     <navigationItem key="navigationItem" title="Grocery SOS" id="Mlo-wt-w1O">
                         <barButtonItem key="leftBarButtonItem" systemItem="cancel" id="dXK-ru-8Lb"/>
-                        <barButtonItem key="rightBarButtonItem" systemItem="done" id="TdE-Q8-3zo">
+                        <barButtonItem key="rightBarButtonItem" tag="101" systemItem="done" id="TdE-Q8-3zo">
                             <connections>
                                 <segue destination="NJ7-Ub-feX" kind="presentation" identifier="routePreview" id="Alv-xF-PY0"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
                     <connections>
+                        <outlet property="doneButton" destination="TdE-Q8-3zo" id="9Gu-IY-kTb"/>
                         <outlet property="searchBar" destination="LAa-wx-UFE" id="vS2-HU-jdh"/>
                         <outlet property="searchTable" destination="vqD-r3-GRc" id="Ff4-A0-EEd"/>
+                        <segue destination="oVa-pa-4XH" kind="presentation" identifier="editCategory" id="dQN-X4-cfB"/>
+                        <segue destination="FLa-cG-CFe" kind="presentation" identifier="managerMode" id="wVt-su-DvJ"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1057" y="309"/>
+        </scene>
+        <!--(Category Name)-->
+        <scene sceneID="pln-2O-81d">
+            <objects>
+                <viewController id="2tN-Sa-qOU" customClass="CategoryPreferenceViewController" customModule="Grocery_SOS" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="1zx-NR-ZBJ"/>
+                        <viewControllerLayoutGuide type="bottom" id="wht-DI-MWX"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="bEm-aV-x82">
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </view>
+                    <navigationItem key="navigationItem" title="(Category Name)" id="c9U-GP-ryx">
+                        <barButtonItem key="leftBarButtonItem" title="Cancel" id="hib-M3-ieB">
+                            <connections>
+                                <action selector="cancel" destination="2tN-Sa-qOU" id="0YN-nd-FJM"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem key="rightBarButtonItem" title="Save" id="mVB-5j-EzS">
+                            <connections>
+                                <action selector="save" destination="2tN-Sa-qOU" id="BC5-VX-39t"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="8D4-q2-I04" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="3099" y="1216"/>
         </scene>
         <!--Route Preview-->
         <scene sceneID="KKV-6v-gXF">
@@ -178,6 +214,66 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="zlR-gF-LCz" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="2157" y="309"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="qDk-FN-tLR">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="oVa-pa-4XH" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="HX8-i1-jNY">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="2tN-Sa-qOU" kind="relationship" relationship="rootViewController" id="Jam-Pb-F0p"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="0Cb-bK-9Qu" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2157" y="1216"/>
+        </scene>
+        <!--Manager-->
+        <scene sceneID="rpV-Ik-hpP">
+            <objects>
+                <viewController id="SAb-7l-xIe" customClass="ManagerViewController" customModule="Grocery_SOS" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="n39-lR-b8p"/>
+                        <viewControllerLayoutGuide type="bottom" id="a1L-hd-MiU"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="WmN-Jf-g82">
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </view>
+                    <navigationItem key="navigationItem" title="Manager" id="Am9-fQ-cfH">
+                        <barButtonItem key="leftBarButtonItem" title="Back" id="keb-gq-MQ7">
+                            <connections>
+                                <action selector="back" destination="SAb-7l-xIe" id="odY-gA-Asn"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="GPm-cW-xnU" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="3075" y="2124"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="UyR-5v-hJJ">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="FLa-cG-CFe" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="gLw-mx-2ob">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="SAb-7l-xIe" kind="relationship" relationship="rootViewController" id="fiP-xq-ydP"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="CjG-a7-gaG" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2157" y="2124"/>
         </scene>
     </scenes>
 </document>

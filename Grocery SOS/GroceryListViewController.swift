@@ -8,10 +8,11 @@
 
 import UIKit
 
-class GroceryListViewController: UIViewController, RoutePreviewViewControllerDelegate {
+class GroceryListViewController: UIViewController, RoutePreviewViewControllerDelegate, CategoryPreferenceViewControllerDelegate, ManagerViewControllerDelegate {
     
     @IBOutlet weak var searchBar: UISearchBar!
     @IBOutlet weak var searchTable: UITableView!
+    @IBOutlet weak var doneButton: UIBarButtonItem!
     
     var items = [GroceryItem]()
     var searchResults = [GroceryItem]()
@@ -53,6 +54,7 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
                 }
             }
         }
+        doneButton.enabled = (!hasSearched && checkedItems.count > 0)
     }
     
     func removeCheckedItem(target: GroceryItem) {
@@ -97,6 +99,22 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
     func routerPreviewViewControllerDidCancel(controller: RoutePreviewViewController) {
         dismissViewControllerAnimated(true, completion: nil)
     }
+    
+    func categoryPreferenceViewControllerCancel(controller: CategoryPreferenceViewController) {
+        dismissViewControllerAnimated(true, completion: nil)
+    }
+    
+    func categoryPreferenceViewControllerSave(controller: CategoryPreferenceViewController) {
+        dismissViewControllerAnimated(true, completion: nil)
+    }
+    
+    @IBAction func managerMode() {
+        performSegueWithIdentifier("managerMode", sender: nil)
+    }
+    
+    func managerViewControllerDelegateBack(controller: ManagerViewController) {
+        dismissViewControllerAnimated(true, completion: nil)
+    }
 
     /*
     // MARK: - Navigation
@@ -112,6 +130,16 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
         if segue.identifier == "routePreview" {
             let navigationController = segue.destinationViewController as! UINavigationController
             let controller = navigationController.topViewController as! RoutePreviewViewController
+            controller.delegate = self
+        } else if segue.identifier == "editCategory" {
+            let title = sender as! String
+            let navigationController = segue.destinationViewController as! UINavigationController
+            let controller = navigationController.topViewController as! CategoryPreferenceViewController
+            controller.delegate = self
+            controller.category = title
+        } else if segue.identifier == "managerMode" {
+            let navigationController = segue.destinationViewController as! UINavigationController
+            let controller = navigationController.topViewController as! ManagerViewController
             controller.delegate = self
         }
     }
@@ -173,6 +201,7 @@ extension GroceryListViewController: UITableViewDataSource {
             cell.textLabel!.text = checkedItems[position].name
             cell.accessoryType = .Checkmark
         }
+        doneButton.enabled = (!hasSearched && checkedItems.count > 0)
         return cell
     }
     
@@ -225,9 +254,14 @@ extension GroceryListViewController: UITableViewDelegate {
         if categories.count != 0 && !(searchResults.count == 0 && hasSearched) {
             cell.textLabel!.text = categories[section]
             cell.textLabel!.textColor = UIColor.whiteColor()
+            cell.accessoryType = hasSearched ? .None : .DetailDisclosureButton
             return cell
         }
         return nil
+    }
+    
+    func tableView(tableView: UITableView, accessoryButtonTappedForRowWithIndexPath indexPath: NSIndexPath) {
+        performSegueWithIdentifier("editCategory", sender: categories[indexPath.section])
     }
     
     

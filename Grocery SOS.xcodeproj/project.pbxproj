@@ -14,6 +14,8 @@
 		59494F371C7D77130085AF62 /* GroceryListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59494F361C7D77130085AF62 /* GroceryListViewController.swift */; };
 		59494F391C7E82460085AF62 /* GroceryItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59494F381C7E82460085AF62 /* GroceryItem.swift */; };
 		59494F3B1C8255D50085AF62 /* RoutePreviewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59494F3A1C8255D50085AF62 /* RoutePreviewViewController.swift */; };
+		59494F3D1C82B8920085AF62 /* CategoryPreferenceViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59494F3C1C82B8920085AF62 /* CategoryPreferenceViewController.swift */; };
+		59494F3F1C82E2450085AF62 /* ManagerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59494F3E1C82E2450085AF62 /* ManagerViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +28,8 @@
 		59494F361C7D77130085AF62 /* GroceryListViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GroceryListViewController.swift; sourceTree = "<group>"; };
 		59494F381C7E82460085AF62 /* GroceryItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GroceryItem.swift; sourceTree = "<group>"; };
 		59494F3A1C8255D50085AF62 /* RoutePreviewViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoutePreviewViewController.swift; sourceTree = "<group>"; };
+		59494F3C1C82B8920085AF62 /* CategoryPreferenceViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CategoryPreferenceViewController.swift; sourceTree = "<group>"; };
+		59494F3E1C82E2450085AF62 /* ManagerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ManagerViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -59,13 +63,15 @@
 			isa = PBXGroup;
 			children = (
 				59494F241C7D72E80085AF62 /* AppDelegate.swift */,
-				59494F281C7D72E80085AF62 /* Main.storyboard */,
 				59494F2B1C7D72E80085AF62 /* Assets.xcassets */,
 				59494F2D1C7D72E80085AF62 /* LaunchScreen.storyboard */,
 				59494F301C7D72E80085AF62 /* Info.plist */,
+				59494F281C7D72E80085AF62 /* Main.storyboard */,
 				59494F361C7D77130085AF62 /* GroceryListViewController.swift */,
 				59494F3A1C8255D50085AF62 /* RoutePreviewViewController.swift */,
+				59494F3C1C82B8920085AF62 /* CategoryPreferenceViewController.swift */,
 				59494F381C7E82460085AF62 /* GroceryItem.swift */,
+				59494F3E1C82E2450085AF62 /* ManagerViewController.swift */,
 			);
 			path = "Grocery SOS";
 			sourceTree = "<group>";
@@ -141,8 +147,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				59494F3F1C82E2450085AF62 /* ManagerViewController.swift in Sources */,
 				59494F371C7D77130085AF62 /* GroceryListViewController.swift in Sources */,
 				59494F391C7E82460085AF62 /* GroceryItem.swift in Sources */,
+				59494F3D1C82B8920085AF62 /* CategoryPreferenceViewController.swift in Sources */,
 				59494F3B1C8255D50085AF62 /* RoutePreviewViewController.swift in Sources */,
 				59494F251C7D72E80085AF62 /* AppDelegate.swift in Sources */,
 			);
