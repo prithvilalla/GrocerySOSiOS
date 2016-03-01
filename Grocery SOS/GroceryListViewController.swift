@@ -34,6 +34,7 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
         items.append(GroceryItem(name: "Banana", category: "Fruits"))
         items.append(GroceryItem(name: "Coke Zero", category: "Beverages"))
         items.append(GroceryItem(name: "Beer", category: "Beverages"))
+        doneButton.enabled = false
         // Do any additional setup after loading the view.
     }
 
@@ -230,11 +231,7 @@ extension GroceryListViewController: UITableViewDataSource {
             return categories.count < 1 ? 1 : categories.count
         }
     }
-    
-    func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        return categories.count != 0 &&  !(searchResults.count == 0 && hasSearched) ? categories[section] : nil
-    }
-    
+
 }
 
 extension GroceryListViewController: UITableViewDelegate {

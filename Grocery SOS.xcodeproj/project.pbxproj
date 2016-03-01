@@ -16,6 +16,7 @@
 		59494F3B1C8255D50085AF62 /* RoutePreviewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59494F3A1C8255D50085AF62 /* RoutePreviewViewController.swift */; };
 		59494F3D1C82B8920085AF62 /* CategoryPreferenceViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59494F3C1C82B8920085AF62 /* CategoryPreferenceViewController.swift */; };
 		59494F3F1C82E2450085AF62 /* ManagerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59494F3E1C82E2450085AF62 /* ManagerViewController.swift */; };
+		59C975041C85793400787737 /* ManagerModifyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59C975031C85793400787737 /* ManagerModifyViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +31,7 @@
 		59494F3A1C8255D50085AF62 /* RoutePreviewViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoutePreviewViewController.swift; sourceTree = "<group>"; };
 		59494F3C1C82B8920085AF62 /* CategoryPreferenceViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CategoryPreferenceViewController.swift; sourceTree = "<group>"; };
 		59494F3E1C82E2450085AF62 /* ManagerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ManagerViewController.swift; sourceTree = "<group>"; };
+		59C975031C85793400787737 /* ManagerModifyViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ManagerModifyViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -70,8 +72,9 @@
 				59494F361C7D77130085AF62 /* GroceryListViewController.swift */,
 				59494F3A1C8255D50085AF62 /* RoutePreviewViewController.swift */,
 				59494F3C1C82B8920085AF62 /* CategoryPreferenceViewController.swift */,
-				59494F381C7E82460085AF62 /* GroceryItem.swift */,
 				59494F3E1C82E2450085AF62 /* ManagerViewController.swift */,
+				59494F381C7E82460085AF62 /* GroceryItem.swift */,
+				59C975031C85793400787737 /* ManagerModifyViewController.swift */,
 			);
 			path = "Grocery SOS";
 			sourceTree = "<group>";
@@ -108,6 +111,7 @@
 				TargetAttributes = {
 					59494F201C7D72E80085AF62 = {
 						CreatedOnToolsVersion = 7.2.1;
+						DevelopmentTeam = K7S5L5Q678;
 					};
 				};
 			};
@@ -152,6 +156,7 @@
 				59494F391C7E82460085AF62 /* GroceryItem.swift in Sources */,
 				59494F3D1C82B8920085AF62 /* CategoryPreferenceViewController.swift in Sources */,
 				59494F3B1C8255D50085AF62 /* RoutePreviewViewController.swift in Sources */,
+				59C975041C85793400787737 /* ManagerModifyViewController.swift in Sources */,
 				59494F251C7D72E80085AF62 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -263,10 +268,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = "Grocery SOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "gsos.Grocery-SOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 			};
 			name = Debug;
 		};
@@ -274,10 +282,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = "Grocery SOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "gsos.Grocery-SOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 			};
 			name = Release;
 		};
@@ -300,6 +311,7 @@
 				59494F351C7D72E80085AF62 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
