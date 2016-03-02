@@ -17,10 +17,20 @@ class ManagerModifyViewController: UIViewController {
     
     weak var delegate: ManagerModifyViewControllerDelegate?
     @IBOutlet weak var textField: UITextField!
+    @IBOutlet weak var saveButton: UIBarButtonItem!
+    var field: String!
+    var data: String!
+    var entry: String!
+    var addItem: Bool!
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.title = field
         textField.becomeFirstResponder()
+        textField.text = data
+        textField.placeholder = field
+        saveButton.enabled = false
+        entry = data
         // Do any additional setup after loading the view.
     }
 
@@ -48,4 +58,18 @@ class ManagerModifyViewController: UIViewController {
     }
     */
 
+}
+
+extension ManagerModifyViewController: UITextFieldDelegate {
+    func textField(textField: UITextField, shouldChangeCharactersInRange range: NSRange, replacementString string: String) -> Bool {
+        let oldText: NSString = textField.text!
+        let newText: NSString = oldText.stringByReplacingCharactersInRange(range, withString: string)
+        if newText.length > 0 && newText != data {
+            saveButton.enabled = true
+            entry = newText as String
+        } else {
+            saveButton.enabled = false
+        }
+        return true
+    }
 }

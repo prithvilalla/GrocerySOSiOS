@@ -15,22 +15,53 @@ protocol ManagerViewControllerDelegate: class {
 class ManagerViewController: UIViewController, ManagerModifyViewControllerDelegate {
     
     @IBOutlet weak var tableView: UITableView!
-    var name: String!
-    var address1: String!
-    var address2: String!
-    var phoneNumber: String!
+    @IBOutlet weak var nameButton: UIButton!
+    @IBOutlet weak var phoneButton: UIButton!
+    @IBOutlet weak var streetButton: UIButton!
+    @IBOutlet weak var cityButton: UIButton!
+    @IBOutlet weak var stateButton: UIButton!
+    @IBOutlet weak var zipButton: UIButton!
+    var information = [String: String]()
+    var inventory = [GroceryItem]()
+    var categories = [String]()
     
     weak var delegate: ManagerViewControllerDelegate?
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        name = "ABC XYZ"
-        address1 = "123 DEF ST"
-        address2 = "ATLANTA GA 12345"
-        phoneNumber = "1234567890"
+        information["Name"] = "ABC XYZ"
+        information["Phone"] = "1234567890"
+        information["Street Address"] = "123 DEF ST"
+        information["City"] = "ATLANTA"
+        information["State"] = "GA"
+        information["Zip"] = "12345"
+        
+        inventory.append(GroceryItem(name: "Milk", category: "Dairy"))
+        inventory.append(GroceryItem(name: "Cheese", category: "Dairy"))
+        inventory.append(GroceryItem(name: "Chicken", category: "Meat"))
+        inventory.append(GroceryItem(name: "Beef", category: "Meat"))
+        inventory.append(GroceryItem(name: "Bread", category: "Bakery"))
+        inventory.append(GroceryItem(name: "Tomato", category: "Vegetables"))
+        inventory.append(GroceryItem(name: "Onion", category: "Vegetables"))
+        inventory.append(GroceryItem(name: "Apple", category: "Fruits"))
+        inventory.append(GroceryItem(name: "Banana", category: "Fruits"))
+        inventory.append(GroceryItem(name: "Coke Zero", category: "Beverages"))
+        inventory.append(GroceryItem(name: "Beer", category: "Beverages"))
+        
         self.automaticallyAdjustsScrollViewInsets = false
 
         // Do any additional setup after loading the view.
+    }
+    
+    override func viewWillAppear(animated: Bool) {
+        nameButton.setTitle(information["Name"], forState: UIControlState.Normal)
+        phoneButton.setTitle(information["Phone"], forState: UIControlState.Normal)
+        streetButton.setTitle(information["Street Address"], forState: UIControlState.Normal)
+        cityButton.setTitle(information["City"], forState: UIControlState.Normal)
+        stateButton.setTitle(information["State"], forState: UIControlState.Normal)
+        zipButton.setTitle(information["Zip"], forState: UIControlState.Normal)
+        
+        inventory.sortInPlace({(item1: GroceryItem, item2: GroceryItem) -> Bool in item1.name < item2.name})
     }
 
     override func didReceiveMemoryWarning() {
@@ -47,9 +78,75 @@ class ManagerViewController: UIViewController, ManagerModifyViewControllerDelega
     }
     
     func managerModifyViewControllerSave(controller: ManagerModifyViewController) {
+        if !controller.addItem {
+            information[controller.field] = controller.entry
+        } else {
+            inventory.append(GroceryItem(name: controller.entry))
+            inventory.sortInPlace({(item1: GroceryItem, item2: GroceryItem) -> Bool in item1.name < item2.name})
+        }
         dismissViewControllerAnimated(true, completion: nil)
+        tableView.reloadData()
+    }
+    
+    @IBAction func nameEdit(sender: UIButton) {
+        performSegueWithIdentifier("managerModify", sender: ["Name", information["Name"]!])
+    }
+    
+    @IBAction func phoneEdit(sender: UIButton) {
+        performSegueWithIdentifier("managerModify", sender: ["Phone", information["Phone"]!])
+    }
+    
+    @IBAction func streetEdit(sender: UIButton) {
+        performSegueWithIdentifier("managerModify", sender: ["Street Address", information["Street Address"]!])
+    }
+    
+    @IBAction func cityEdit(sender: UIButton) {
+        performSegueWithIdentifier("managerModify", sender: ["City", information["City"]!])
     }
 
+    @IBAction func stateEdit(sender: UIButton) {
+        performSegueWithIdentifier("managerModify", sender: ["State", information["State"]!])
+    }
+    
+    @IBAction func zipEdit(sender: UIButton) {
+        performSegueWithIdentifier("managerModify", sender: ["Zip", information["Zip"]!])
+    }
+    
+    @IBAction func addItem(sender: UIBarButtonItem) {
+        performSegueWithIdentifier("addItem", sender: nil)
+    }
+    
+    func constructCategories(searchArray: [GroceryItem]) {
+        categories.removeAll(keepCapacity: false)
+        for item in searchArray {
+            if !categories.contains(item.category) {
+                categories.append(item.category)
+            }
+        }
+        categories.sortInPlace()
+    }
+    
+    func numberOfRowsPerSection(searchArray: [GroceryItem], section: Int) -> Int {
+        var count = 0
+        for item in searchArray {
+            if item.category == categories[section] {
+                count++
+            }
+        }
+        return count
+    }
+    
+    func positionInArray(searchArray: [GroceryItem], indexPath: NSIndexPath) -> Int {
+        let category = categories[indexPath.section]
+        var positions = [Int]()
+        for i in 0...(searchArray.count - 1) {
+            if category == searchArray[i].category {
+                positions.append(i)
+            }
+        }
+        return positions[indexPath.row]
+    }
+    
     /*
     // MARK: - Navigation
 
@@ -65,16 +162,23 @@ class ManagerViewController: UIViewController, ManagerModifyViewControllerDelega
             let navigationController = segue.destinationViewController as! UINavigationController
             let controller = navigationController.topViewController as! ManagerModifyViewController
             controller.delegate = self
+            let info = sender as! [String]
+            controller.field = info[0]
+            controller.data = info[1]
+            controller.addItem = false
+        } else if segue.identifier == "addItem" {
+            let navigationController = segue.destinationViewController as! UINavigationController
+            let controller = navigationController.topViewController as! ManagerModifyViewController
+            controller.delegate = self
+            controller.field = "Add Item"
+            controller.data = ""
+            controller.addItem = true
         }
     }
 
 }
 
 extension ManagerViewController: UITableViewDelegate {
-    
-    func tableView(tableView: UITableView, accessoryButtonTappedForRowWithIndexPath indexPath: NSIndexPath) {
-        performSegueWithIdentifier("managerModify", sender: nil)
-    }
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         tableView.deselectRowAtIndexPath(indexPath, animated: true)
@@ -83,20 +187,11 @@ extension ManagerViewController: UITableViewDelegate {
     func tableView(tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let cellIdentifier = "HeaderViewCell"
         let cell: UITableViewCell! = tableView.dequeueReusableCellWithIdentifier(cellIdentifier)
-        if section == 0 {
-            cell.textLabel!.text = "Name"
-        } else if section == 1 {
-            cell.textLabel!.text = "Address 1"
-        } else if section == 2 {
-            cell.textLabel!.text = "Address 2"
-        } else if section == 3 {
-            cell.textLabel!.text = "Phone Number"
-        }
+        cell.textLabel!.text = categories[section]
         cell.textLabel!.textColor = UIColor.whiteColor()
         return cell
     }
-    
-    
+
 }
 
 extension ManagerViewController: UITableViewDataSource {
@@ -104,24 +199,29 @@ extension ManagerViewController: UITableViewDataSource {
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cellIdentifier = "TableViewCell"
         let cell: UITableViewCell! = tableView.dequeueReusableCellWithIdentifier(cellIdentifier)
-        if indexPath.section == 0 {
-            cell.textLabel!.text = name
-        } else if indexPath.section == 1 {
-            cell.textLabel!.text = address2
-        } else if indexPath.section == 2 {
-            cell.textLabel!.text = address2
-        } else if indexPath.section == 3 {
-            cell.textLabel!.text = phoneNumber
-        }
+        let position = positionInArray(inventory, indexPath: indexPath)
+        cell.textLabel!.text = inventory[position].name
         return cell
     }
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 1
+        return numberOfRowsPerSection(inventory, section: section)
     }
     
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        return 4
+        constructCategories(inventory)
+        return categories.count
+    }
+    
+    func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+        return true
+    }
+    
+    func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
+        let position = positionInArray(inventory, indexPath: indexPath)
+        inventory.removeAtIndex(position)
+        constructCategories(inventory)
+        tableView.reloadData()
     }
     
 }

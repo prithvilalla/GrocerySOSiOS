@@ -37,6 +37,10 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
         doneButton.enabled = false
         // Do any additional setup after loading the view.
     }
+    
+    override func viewWillAppear(animated: Bool) {
+        items.sortInPlace({(item1: GroceryItem, item2: GroceryItem) -> Bool in item1.name < item2.name})
+    }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -55,6 +59,7 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
                 }
             }
         }
+        checkedItems.sortInPlace({(item1: GroceryItem, item2: GroceryItem) -> Bool in item1.name < item2.name})
         doneButton.enabled = (!hasSearched && checkedItems.count > 0)
     }
     
@@ -74,6 +79,7 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
                 categories.append(item.category)
             }
         }
+        categories.sortInPlace()
     }
     
     func numberOfRowsPerSection(searchArray: [GroceryItem], section: Int) -> Int {
@@ -161,6 +167,7 @@ extension GroceryListViewController: UISearchBarDelegate {
                 searchResults.append(item)
             }
         }
+        searchResults.sortInPlace({(item1: GroceryItem, item2: GroceryItem) -> Bool in item1.name < item2.name})
         searchTable.reloadData()
     }
     

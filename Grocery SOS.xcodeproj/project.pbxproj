@@ -73,8 +73,8 @@
 				59494F3A1C8255D50085AF62 /* RoutePreviewViewController.swift */,
 				59494F3C1C82B8920085AF62 /* CategoryPreferenceViewController.swift */,
 				59494F3E1C82E2450085AF62 /* ManagerViewController.swift */,
-				59494F381C7E82460085AF62 /* GroceryItem.swift */,
 				59C975031C85793400787737 /* ManagerModifyViewController.swift */,
+				59494F381C7E82460085AF62 /* GroceryItem.swift */,
 			);
 			path = "Grocery SOS";
 			sourceTree = "<group>";
