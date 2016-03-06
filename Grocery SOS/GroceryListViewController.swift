@@ -22,18 +22,8 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
     let emptySearchMessage = "(Nothing found)"
     
     required init?(coder aDecoder: NSCoder) {
-        items.append(GroceryItem(name: "Milk", category: "Dairy"))
-        items.append(GroceryItem(name: "Cheese", category: "Dairy"))
-        items.append(GroceryItem(name: "Chicken", category: "Meat"))
-        items.append(GroceryItem(name: "Beef", category: "Meat"))
-        items.append(GroceryItem(name: "Bread", category: "Bakery"))
-        items.append(GroceryItem(name: "Tomato", category: "Vegetables"))
-        items.append(GroceryItem(name: "Onion", category: "Vegetables"))
-        items.append(GroceryItem(name: "Apple", category: "Fruits"))
-        items.append(GroceryItem(name: "Banana", category: "Fruits"))
-        items.append(GroceryItem(name: "Coke Zero", category: "Beverages"))
-        items.append(GroceryItem(name: "Beer", category: "Beverages"))
         super.init(coder: aDecoder)
+        loadData()
     }
 
     override func viewDidLoad() {
@@ -125,6 +115,25 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
     
     func managerViewControllerDelegateBack(controller: ManagerViewController) {
         dismissViewControllerAnimated(true, completion: nil)
+    }
+    
+    func documentsDirectory() -> String {
+        let paths = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)
+        return paths[0]
+    }
+    
+    func dataFilePath() -> String {
+        return (documentsDirectory() as NSString).stringByAppendingPathComponent("GrocerySOSManager.plist")
+    }
+    
+    func loadData() {
+        let path = dataFilePath()
+        if NSFileManager.defaultManager().fileExistsAtPath(path) {
+            if let data = NSData(contentsOfFile: path) {
+                let unarchiver = NSKeyedUnarchiver(forReadingWithData: data)
+                items = unarchiver.decodeObjectForKey("managerInventory") as! [GroceryItem]
+            }
+        }
     }
 
     /*
