@@ -26,29 +26,27 @@ class ManagerViewController: UIViewController, ManagerModifyViewControllerDelega
     var categories = [String]()
     
     weak var delegate: ManagerViewControllerDelegate?
+    
+    required init?(coder aDecoder: NSCoder) {
+        
+        super.init(coder: aDecoder)
+        
+        loadData()
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        information["Name"] = "ABC XYZ"
-        information["Phone"] = "1234567890"
-        information["Street Address"] = "123 DEF ST"
-        information["City"] = "ATLANTA"
-        information["State"] = "GA"
-        information["Zip"] = "12345"
-        
-        inventory.append(GroceryItem(name: "Milk", category: "Dairy"))
-        inventory.append(GroceryItem(name: "Cheese", category: "Dairy"))
-        inventory.append(GroceryItem(name: "Chicken", category: "Meat"))
-        inventory.append(GroceryItem(name: "Beef", category: "Meat"))
-        inventory.append(GroceryItem(name: "Bread", category: "Bakery"))
-        inventory.append(GroceryItem(name: "Tomato", category: "Vegetables"))
-        inventory.append(GroceryItem(name: "Onion", category: "Vegetables"))
-        inventory.append(GroceryItem(name: "Apple", category: "Fruits"))
-        inventory.append(GroceryItem(name: "Banana", category: "Fruits"))
-        inventory.append(GroceryItem(name: "Coke Zero", category: "Beverages"))
-        inventory.append(GroceryItem(name: "Beer", category: "Beverages"))
         
         self.automaticallyAdjustsScrollViewInsets = false
+        
+        if information.count == 0 {
+            information["Name"] = "BLANK"
+            information["Phone"] = "BLANK"
+            information["Street Address"] = "BLANK"
+            information["City"] = "BLANK"
+            information["State"] = "BLANK"
+            information["Zip"] = "BLANK"
+        }
 
         // Do any additional setup after loading the view.
     }
@@ -81,11 +79,12 @@ class ManagerViewController: UIViewController, ManagerModifyViewControllerDelega
         if !controller.addItem {
             information[controller.field] = controller.entry
         } else {
-            inventory.append(GroceryItem(name: controller.entry))
+            inventory.append(GroceryItem(name: controller.entry, category: controller.category, descript: controller.descript))
             inventory.sortInPlace({(item1: GroceryItem, item2: GroceryItem) -> Bool in item1.name < item2.name})
         }
         dismissViewControllerAnimated(true, completion: nil)
         tableView.reloadData()
+        saveData()
     }
     
     @IBAction func nameEdit(sender: UIButton) {
@@ -145,6 +144,35 @@ class ManagerViewController: UIViewController, ManagerModifyViewControllerDelega
             }
         }
         return positions[indexPath.row]
+    }
+    
+    func documentsDirectory() -> String {
+        let paths = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)
+        return paths[0]
+    }
+    
+    func dataFilePath() -> String {
+        return (documentsDirectory() as NSString).stringByAppendingPathComponent("GrocerySOSManager.plist")
+    }
+    
+    func saveData() {
+        let data = NSMutableData()
+        let archiver = NSKeyedArchiver(forWritingWithMutableData: data)
+        archiver.encodeObject(inventory, forKey: "managerInventory")
+        archiver.encodeObject(information, forKey: "managerInformation")
+        archiver.finishEncoding()
+        data.writeToFile(dataFilePath(), atomically: true)
+    }
+    
+    func loadData() {
+        let path = dataFilePath()
+        if NSFileManager.defaultManager().fileExistsAtPath(path) {
+            if let data = NSData(contentsOfFile: path) {
+                let unarchiver = NSKeyedUnarchiver(forReadingWithData: data)
+                inventory = unarchiver.decodeObjectForKey("managerInventory") as! [GroceryItem]
+                information = unarchiver.decodeObjectForKey("managerInformation") as! [String:String]
+            }
+        }
     }
     
     /*
@@ -222,6 +250,7 @@ extension ManagerViewController: UITableViewDataSource {
         inventory.removeAtIndex(position)
         constructCategories(inventory)
         tableView.reloadData()
+        saveData()
     }
     
 }

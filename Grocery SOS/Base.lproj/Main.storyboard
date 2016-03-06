@@ -21,7 +21,7 @@
                         <subviews>
                             <searchBar contentMode="redraw" placeholder="Grocery item" showsCancelButton="YES" translatesAutoresizingMaskIntoConstraints="NO" id="LAa-wx-UFE">
                                 <rect key="frame" x="20" y="64" width="560" height="44"/>
-                                <textInputTraits key="textInputTraits"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="words" enablesReturnKeyAutomatically="YES"/>
                                 <scopeButtonTitles>
                                     <string>Title</string>
                                     <string>Title</string>
@@ -109,7 +109,6 @@
                         </variation>
                     </view>
                     <navigationItem key="navigationItem" title="Grocery SOS" id="Mlo-wt-w1O">
-                        <barButtonItem key="leftBarButtonItem" systemItem="cancel" id="dXK-ru-8Lb"/>
                         <barButtonItem key="rightBarButtonItem" tag="101" systemItem="done" id="TdE-Q8-3zo">
                             <connections>
                                 <segue destination="NJ7-Ub-feX" kind="presentation" identifier="routePreview" id="Alv-xF-PY0"/>
@@ -524,42 +523,95 @@
                     <view key="view" contentMode="scaleToFill" id="df1-y4-yAQ">
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="N77-G7-Vcd">
+                            <textField opaque="NO" clipsSubviews="YES" tag="1" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="N77-G7-Vcd">
                                 <rect key="frame" x="-25" y="-30" width="97" height="30"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits" enablesReturnKeyAutomatically="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="words" enablesReturnKeyAutomatically="YES"/>
                                 <connections>
                                     <outlet property="delegate" destination="1So-Gw-Mxe" id="xbE-mf-N3E"/>
+                                </connections>
+                            </textField>
+                            <pickerView contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ALC-O1-P6R">
+                                <rect key="frame" x="0.0" y="-216" width="320" height="216"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="200" id="Fc0-22-Y2A"/>
+                                </constraints>
+                                <variation key="default">
+                                    <mask key="constraints">
+                                        <exclude reference="Fc0-22-Y2A"/>
+                                    </mask>
+                                </variation>
+                                <variation key="widthClass=compact">
+                                    <mask key="constraints">
+                                        <include reference="Fc0-22-Y2A"/>
+                                    </mask>
+                                </variation>
+                                <connections>
+                                    <outlet property="dataSource" destination="1So-Gw-Mxe" id="VS8-6i-vGK"/>
+                                    <outlet property="delegate" destination="1So-Gw-Mxe" id="evF-Ip-cK0"/>
+                                </connections>
+                            </pickerView>
+                            <textField opaque="NO" clipsSubviews="YES" tag="2" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Description (optional)" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="IEV-L6-sgh">
+                                <rect key="frame" x="-25" y="-30" width="97" height="30"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences" enablesReturnKeyAutomatically="YES"/>
+                                <connections>
+                                    <outlet property="delegate" destination="1So-Gw-Mxe" id="kxq-Hb-CUC"/>
                                 </connections>
                             </textField>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="N77-G7-Vcd" firstAttribute="centerY" secondItem="df1-y4-yAQ" secondAttribute="centerY" id="6fh-cu-3J8"/>
+                            <constraint firstItem="ALC-O1-P6R" firstAttribute="leading" secondItem="df1-y4-yAQ" secondAttribute="leadingMargin" id="2HS-Cn-hhF"/>
                             <constraint firstItem="N77-G7-Vcd" firstAttribute="centerX" secondItem="df1-y4-yAQ" secondAttribute="centerX" id="7Db-eD-S8z"/>
+                            <constraint firstItem="ALC-O1-P6R" firstAttribute="top" secondItem="N77-G7-Vcd" secondAttribute="bottom" constant="10" id="HSH-TK-fdP"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="IEV-L6-sgh" secondAttribute="trailing" constant="5" id="LOr-Oy-CO8"/>
                             <constraint firstItem="N77-G7-Vcd" firstAttribute="leading" secondItem="df1-y4-yAQ" secondAttribute="leadingMargin" constant="5" id="Mho-er-Kk4"/>
+                            <constraint firstItem="IEV-L6-sgh" firstAttribute="leading" secondItem="df1-y4-yAQ" secondAttribute="leadingMargin" constant="5" id="aow-eH-Est"/>
+                            <constraint firstItem="IEV-L6-sgh" firstAttribute="top" secondItem="ALC-O1-P6R" secondAttribute="bottom" constant="10" id="fd2-Ba-aho"/>
+                            <constraint firstItem="IEV-L6-sgh" firstAttribute="centerX" secondItem="df1-y4-yAQ" secondAttribute="centerX" id="il8-aC-JO6"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="ALC-O1-P6R" secondAttribute="trailing" id="jiY-cr-sXB"/>
                             <constraint firstAttribute="trailingMargin" secondItem="N77-G7-Vcd" secondAttribute="trailing" constant="5" id="jt3-n5-rwn"/>
+                            <constraint firstItem="N77-G7-Vcd" firstAttribute="top" secondItem="sFf-ZD-ROH" secondAttribute="bottom" constant="50" id="yU8-yd-FG5"/>
                         </constraints>
                         <variation key="default">
                             <mask key="subviews">
                                 <exclude reference="N77-G7-Vcd"/>
+                                <exclude reference="ALC-O1-P6R"/>
+                                <exclude reference="IEV-L6-sgh"/>
                             </mask>
                             <mask key="constraints">
-                                <exclude reference="6fh-cu-3J8"/>
                                 <exclude reference="7Db-eD-S8z"/>
                                 <exclude reference="Mho-er-Kk4"/>
                                 <exclude reference="jt3-n5-rwn"/>
+                                <exclude reference="yU8-yd-FG5"/>
+                                <exclude reference="2HS-Cn-hhF"/>
+                                <exclude reference="HSH-TK-fdP"/>
+                                <exclude reference="jiY-cr-sXB"/>
+                                <exclude reference="LOr-Oy-CO8"/>
+                                <exclude reference="aow-eH-Est"/>
+                                <exclude reference="fd2-Ba-aho"/>
+                                <exclude reference="il8-aC-JO6"/>
                             </mask>
                         </variation>
                         <variation key="widthClass=compact">
                             <mask key="subviews">
                                 <include reference="N77-G7-Vcd"/>
+                                <include reference="ALC-O1-P6R"/>
+                                <include reference="IEV-L6-sgh"/>
                             </mask>
                             <mask key="constraints">
-                                <include reference="6fh-cu-3J8"/>
                                 <include reference="7Db-eD-S8z"/>
                                 <include reference="Mho-er-Kk4"/>
                                 <include reference="jt3-n5-rwn"/>
+                                <include reference="yU8-yd-FG5"/>
+                                <include reference="2HS-Cn-hhF"/>
+                                <include reference="HSH-TK-fdP"/>
+                                <include reference="jiY-cr-sXB"/>
+                                <include reference="LOr-Oy-CO8"/>
+                                <include reference="aow-eH-Est"/>
+                                <include reference="fd2-Ba-aho"/>
+                                <include reference="il8-aC-JO6"/>
                             </mask>
                         </variation>
                     </view>
@@ -576,6 +628,8 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
+                        <outlet property="categoryPicker" destination="ALC-O1-P6R" id="95J-c3-NGv"/>
+                        <outlet property="descriptionTextField" destination="IEV-L6-sgh" id="SEW-aR-vTK"/>
                         <outlet property="saveButton" destination="BA2-ak-Jno" id="pZp-lw-VhG"/>
                         <outlet property="textField" destination="N77-G7-Vcd" id="mr6-Tz-QTM"/>
                     </connections>

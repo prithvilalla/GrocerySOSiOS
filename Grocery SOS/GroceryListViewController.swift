@@ -20,9 +20,8 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
     var categories = [String]()
     var hasSearched = false
     let emptySearchMessage = "(Nothing found)"
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
+    
+    required init?(coder aDecoder: NSCoder) {
         items.append(GroceryItem(name: "Milk", category: "Dairy"))
         items.append(GroceryItem(name: "Cheese", category: "Dairy"))
         items.append(GroceryItem(name: "Chicken", category: "Meat"))
@@ -34,6 +33,11 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
         items.append(GroceryItem(name: "Banana", category: "Fruits"))
         items.append(GroceryItem(name: "Coke Zero", category: "Beverages"))
         items.append(GroceryItem(name: "Beer", category: "Beverages"))
+        super.init(coder: aDecoder)
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
         doneButton.enabled = false
         // Do any additional setup after loading the view.
     }
@@ -184,6 +188,8 @@ extension GroceryListViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(searchBar: UISearchBar) {
         searchBar.endEditing(true)
     }
+    
+    
     
 }
 
