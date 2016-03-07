@@ -20,6 +20,7 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
     var categories = [String]()
     var hasSearched = false
     let emptySearchMessage = "(Nothing found)"
+    var isLoading = false
     
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -115,6 +116,7 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
     
     func managerViewControllerDelegateBack(controller: ManagerViewController) {
         dismissViewControllerAnimated(true, completion: nil)
+        loadData()
     }
     
     func documentsDirectory() -> String {
@@ -133,6 +135,36 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
                 let unarchiver = NSKeyedUnarchiver(forReadingWithData: data)
                 items = unarchiver.decodeObjectForKey("managerInventory") as! [GroceryItem]
             }
+        }
+    }
+    
+    func urlWithSearchText(searchText: String) -> NSURL {
+        let escapedSearchText = searchText.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())!
+        let urlString = String(format: "https://itunes.apple.com/search?term=%@", escapedSearchText)
+        let url = NSURL(string: urlString)
+        return url!
+    }
+    
+    func performStoreRequestWithUrl(url: NSURL) -> String? {
+        do {
+            return try String(contentsOfURL: url, encoding: NSUTF8StringEncoding)
+        } catch {
+            print("Download Error")
+            return nil
+        }
+    }
+    
+    func parseJSON(jsonString: String) -> [String:AnyObject]? {
+        guard let data = jsonString.dataUsingEncoding(NSUTF8StringEncoding)
+            else {
+                return nil
+        }
+        
+        do {
+            return try NSJSONSerialization.JSONObjectWithData(data, options: []) as? [String:AnyObject]
+        } catch {
+            print("JSON Error \(error)")
+            return nil
         }
     }
 
@@ -171,17 +203,36 @@ extension GroceryListViewController: UISearchBarDelegate {
     func searchBar(searchBar: UISearchBar, textDidChange searchText: String) {
         if searchText != "" {
             hasSearched = true
+            isLoading = true
+            searchTable.reloadData()
+            
+            let queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
+            
+            dispatch_async(queue) {
+                let url = self.urlWithSearchText(searchText)
+                if let jsonString = self.performStoreRequestWithUrl(url) {
+                    if var dictionary = self.parseJSON(jsonString) {
+                        dictionary.removeAll(keepCapacity: false)
+                    }
+                }
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.isLoading = false
+                    self.searchResults.removeAll(keepCapacity: false)
+                    for item in self.items {
+                        if item.name.contains(searchBar.text!) {
+                            self.searchResults.append(item)
+                        }
+                    }
+                    self.searchResults.sortInPlace({(item1: GroceryItem, item2: GroceryItem) -> Bool in item1.name < item2.name})
+                    self.searchTable.reloadData()
+                }
+                return
+            }
         } else {
             hasSearched = false
+            searchResults.removeAll(keepCapacity: false)
+            searchTable.reloadData()
         }
-        searchResults.removeAll(keepCapacity: false)
-        for item in items {
-            if item.name.contains(searchBar.text!) {
-                searchResults.append(item)
-            }
-        }
-        searchResults.sortInPlace({(item1: GroceryItem, item2: GroceryItem) -> Bool in item1.name < item2.name})
-        searchTable.reloadData()
     }
     
     func searchBarTextDidEndEditing(searchBar: UISearchBar) {
@@ -205,8 +256,13 @@ extension GroceryListViewController: UISearchBarDelegate {
 extension GroceryListViewController: UITableViewDataSource {
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cellIdentifier = "TableViewCell"
+        let cellIdentifier = isLoading ? "LoadingViewCell" : "TableViewCell"
         let cell: UITableViewCell! = tableView.dequeueReusableCellWithIdentifier(cellIdentifier)
+        if isLoading {
+            let activityIndicator = cell.viewWithTag(100) as? UIActivityIndicatorView
+            activityIndicator?.startAnimating()
+            return cell
+        }
         if hasSearched {
             if searchResults.count == 0 {
                 cell.textLabel!.text = emptySearchMessage
@@ -229,6 +285,9 @@ extension GroceryListViewController: UITableViewDataSource {
     }
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if isLoading {
+            return 1
+        }
         if hasSearched {
             if searchResults.count == 0 {
                 return 1
@@ -241,6 +300,9 @@ extension GroceryListViewController: UITableViewDataSource {
     }
     
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+        if isLoading {
+            return 1
+        }
         if hasSearched {
             if searchResults.count == 0 {
                 return 1
@@ -259,15 +321,22 @@ extension GroceryListViewController: UITableViewDataSource {
 extension GroceryListViewController: UITableViewDelegate {
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        let cell = tableView.cellForRowAtIndexPath(indexPath)!
-        if cell.textLabel!.text != emptySearchMessage {
-            toggleCheckmark(cell.textLabel!.text!)
+        if isLoading {
+            tableView.deselectRowAtIndexPath(indexPath, animated: true)
+        } else {
+            let cell = tableView.cellForRowAtIndexPath(indexPath)!
+            if cell.textLabel!.text != emptySearchMessage {
+                toggleCheckmark(cell.textLabel!.text!)
+            }
+            tableView.deselectRowAtIndexPath(indexPath, animated: true)
+            tableView.reloadData()
         }
-        tableView.deselectRowAtIndexPath(indexPath, animated: true)
-        tableView.reloadData()
     }
     
     func tableView(tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        if isLoading {
+            return nil
+        }
         let cellIdentifier = "HeaderViewCell"
         let cell: UITableViewCell! = tableView.dequeueReusableCellWithIdentifier(cellIdentifier)
         if categories.count != 0 && !(searchResults.count == 0 && hasSearched) {
