@@ -9,7 +9,7 @@
 import UIKit
 
 protocol RoutePreviewViewControllerDelegate: class {
-    func routerPreviewViewControllerDidCancel(controller: RoutePreviewViewController)
+    func routePreviewViewControllerDidCancel(controller: RoutePreviewViewController)
 }
 
 class RoutePreviewViewController: UIViewController {
@@ -28,7 +28,7 @@ class RoutePreviewViewController: UIViewController {
     }
     
     @IBAction func cancel() {
-        delegate?.routerPreviewViewControllerDidCancel(self)
+        delegate?.routePreviewViewControllerDidCancel(self)
     }
     
 

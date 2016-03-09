@@ -190,6 +190,11 @@
                         </variation>
                     </view>
                     <navigationItem key="navigationItem" title="Grocery SOS" id="Mlo-wt-w1O">
+                        <barButtonItem key="leftBarButtonItem" title="Clear" id="2K5-SV-dfA">
+                            <connections>
+                                <action selector="clearGroceryItem:" destination="BYZ-38-t0r" id="yny-MZ-oiV"/>
+                            </connections>
+                        </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" tag="101" systemItem="done" id="TdE-Q8-3zo">
                             <connections>
                                 <segue destination="NJ7-Ub-feX" kind="presentation" identifier="routePreview" id="Alv-xF-PY0"/>

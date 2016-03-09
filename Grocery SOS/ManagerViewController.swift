@@ -9,7 +9,7 @@
 import UIKit
 
 protocol ManagerViewControllerDelegate: class {
-    func managerViewControllerDelegateBack(controller: ManagerViewController)
+    func managerViewControllerBack(controller: ManagerViewController)
 }
 
 class ManagerViewController: UIViewController, ManagerModifyViewControllerDelegate {
@@ -68,7 +68,7 @@ class ManagerViewController: UIViewController, ManagerModifyViewControllerDelega
     }
     
     @IBAction func back() {
-        delegate?.managerViewControllerDelegateBack(self)
+        delegate?.managerViewControllerBack(self)
     }
     
     func managerModifyViewControllerCancel(controller: ManagerModifyViewController) {
