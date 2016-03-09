@@ -22,6 +22,7 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
     let emptySearchMessage = "(Nothing found)"
     var isLoading = false
     var dataTask: NSURLSessionDataTask?
+    let serverUrl = "https://grocery-sos.herokuapp.com"
     
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -41,6 +42,25 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+    
+    @IBAction func clearGroceryItem(sender: UIBarButtonItem) {
+        resetGroceryItem()
+    }
+    
+    func resetGroceryItem() {
+        for item in items {
+            item.checkmark = false
+        }
+        searchResults.removeAll(keepCapacity: false)
+        checkedItems.removeAll(keepCapacity: false)
+        categories.removeAll(keepCapacity: false)
+        hasSearched = false
+        isLoading = false
+        searchBar.text = ""
+        searchBar.resignFirstResponder()
+        doneButton.enabled = false
+        searchTable.reloadData()
     }
     
     func toggleCheckmark(name: String) {
@@ -115,7 +135,7 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
         performSegueWithIdentifier("managerMode", sender: nil)
     }
     
-    func managerViewControllerDelegateBack(controller: ManagerViewController) {
+    func managerViewControllerBack(controller: ManagerViewController) {
         dismissViewControllerAnimated(true, completion: nil)
         loadData()
     }
@@ -141,7 +161,7 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
     
     func urlWithSearchText(searchText: String) -> NSURL {
         let escapedSearchText = searchText.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())!
-        let urlString = String(format: "https://itunes.apple.com/search?term=%@", escapedSearchText)
+        let urlString = String(format: "%@%@", serverUrl, escapedSearchText)
         let url = NSURL(string: urlString)
         return url!
     }
@@ -153,6 +173,13 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
             print("JSON Error \(error)")
             return nil
         }
+    }
+    
+    func showNetworkError() {
+        let alert = UIAlertController(title: "Error", message: "There seems to be a connectivity issue. Please try again.", preferredStyle: .Alert)
+        let action = UIAlertAction(title: "OK", style: .Default, handler: {alert in self.resetGroceryItem()})
+        alert.addAction(action)
+        presentViewController(alert, animated: false, completion: nil)
     }
 
     /*
@@ -188,13 +215,13 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
 extension GroceryListViewController: UISearchBarDelegate {
     
     func searchBar(searchBar: UISearchBar, textDidChange searchText: String) {
+        dataTask?.cancel()
         if searchText != "" {
             hasSearched = true
             isLoading = true
-            dataTask?.cancel()
             searchTable.reloadData()
 
-            let url = self.urlWithSearchText(searchText)
+            let url = self.urlWithSearchText(String(format: "/api/user/available/%@", searchText))
             let session = NSURLSession.sharedSession()
             dataTask = session.dataTaskWithURL(url, completionHandler: {data, response, error in
                 if let error = error where error.code == -999 {
@@ -202,6 +229,7 @@ extension GroceryListViewController: UISearchBarDelegate {
                 } else if let httpResponse = response as? NSHTTPURLResponse where httpResponse.statusCode == 200 {
                     if let data = data {
                         var dictionary = self.parseJSON(data)
+                        print(dictionary)
                         dictionary?.removeAll(keepCapacity: false)
                         dispatch_async(dispatch_get_main_queue()) {
                             self.isLoading = false
@@ -217,20 +245,26 @@ extension GroceryListViewController: UISearchBarDelegate {
                         return
                     }
                 } else {
-                        print("Failure \(response!)")
+                    dispatch_async(dispatch_get_main_queue()) {
+                        self.showNetworkError()
+                        print("Failure \(response)")
                     }
-                })
+                }
+            })
             dataTask?.resume()
         } else {
             hasSearched = false
+            isLoading = false
             searchResults.removeAll(keepCapacity: false)
             searchTable.reloadData()
         }
     }
     
     func searchBarTextDidEndEditing(searchBar: UISearchBar) {
+        dataTask?.cancel()
         searchBar.text = ""
         hasSearched = false
+        isLoading = false
         searchTable.reloadData()
     }
     
@@ -241,7 +275,6 @@ extension GroceryListViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(searchBar: UISearchBar) {
         searchBar.endEditing(true)
     }
-    
     
     
 }
@@ -259,6 +292,7 @@ extension GroceryListViewController: UITableViewDataSource {
         if hasSearched {
             if searchResults.count == 0 {
                 cell.textLabel!.text = emptySearchMessage
+                cell.accessoryType = .None
             } else {
                 let position = positionInArray(searchResults, indexPath: indexPath)
                 cell.textLabel!.text = searchResults[position].name
