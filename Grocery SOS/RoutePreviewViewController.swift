@@ -15,9 +15,19 @@ protocol RoutePreviewViewControllerDelegate: class {
 class RoutePreviewViewController: UIViewController {
     
     weak var delegate: RoutePreviewViewControllerDelegate?
+    @IBOutlet weak var routeTable: UITableView!
+    var stores = [String]()
+    
+    required init?(coder aDecoder: NSCoder) {
+        stores.append("Home Depot")
+        stores.append("Publix")
+        super.init(coder: aDecoder)
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        routeTable.editing = true
+        self.automaticallyAdjustsScrollViewInsets = false
 
         // Do any additional setup after loading the view.
     }
@@ -42,4 +52,62 @@ class RoutePreviewViewController: UIViewController {
     }
     */
 
+}
+
+extension RoutePreviewViewController: UITableViewDelegate {
+    
+    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        tableView.deselectRowAtIndexPath(indexPath, animated: true)
+    }
+    
+    func tableView(tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        let cellIdentifier = "HeaderViewCell"
+        let cell: UITableViewCell! = tableView.dequeueReusableCellWithIdentifier(cellIdentifier)
+        cell.textLabel!.text = "Store List"
+        cell.textLabel!.textColor = UIColor.whiteColor()
+        return cell
+    }
+    
+    func tableView(tableView: UITableView, editingStyleForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCellEditingStyle {
+        return .None
+    }
+    
+    func tableView(tableView: UITableView, shouldIndentWhileEditingRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+        return false
+    }
+    
+}
+
+extension RoutePreviewViewController: UITableViewDataSource {
+    
+    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        let cellIdentifier = "TableViewCell"
+        let cell: UITableViewCell! = tableView.dequeueReusableCellWithIdentifier(cellIdentifier)
+        cell.textLabel!.text = "\(indexPath.row + 1). \(stores[indexPath.row])"
+        return cell
+    }
+    
+    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return stores.count
+    }
+    
+    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+        return 1
+    }
+    
+    func tableView(tableView: UITableView, canMoveRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+        return true
+    }
+    
+    func tableView(tableView: UITableView, moveRowAtIndexPath sourceIndexPath: NSIndexPath, toIndexPath destinationIndexPath: NSIndexPath) {
+        let temp = stores[sourceIndexPath.row]
+        stores[sourceIndexPath.row] = stores[destinationIndexPath.row]
+        stores[destinationIndexPath.row] = temp
+        routeTable.reloadData()
+    }
+    
+    func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+        return true
+    }
+    
 }

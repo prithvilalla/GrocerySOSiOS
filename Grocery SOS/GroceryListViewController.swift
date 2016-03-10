@@ -56,6 +56,7 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
         checkedItems.removeAll(keepCapacity: false)
         categories.removeAll(keepCapacity: false)
         hasSearched = false
+        dataTask?.cancel()
         isLoading = false
         searchBar.text = ""
         searchBar.resignFirstResponder()
