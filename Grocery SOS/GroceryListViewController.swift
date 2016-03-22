@@ -213,7 +213,6 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
                 if let data = data {
                     let dictionary = self.parseJSON(data)
                     self.token = dictionary!["token"] as! String
-                    print("Token \(self.token)")
                     dispatch_async(dispatch_get_main_queue()) {
                         self.getUserId()
                     }
@@ -244,7 +243,6 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
                 if let data = data {
                     let dictionary = self.parseJSON(data)
                     self.userId = dictionary!["id"] as! Int
-                    print("UserId \(self.userId)")
                     dispatch_async(dispatch_get_main_queue()) {
                         self.isLoading = false
                         self.searchTable.reloadData()
@@ -267,16 +265,20 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
         if authStatus == .NotDetermined {
             locationManager.requestWhenInUseAuthorization()
         } else if authStatus == .Denied || authStatus == .Restricted {
-            let alert = UIAlertController(title: "Location Services Disable", message: "Please enable location services for this app in Settings.", preferredStyle: .Alert)
-            let okAction = UIAlertAction(title: "OK", style: .Default, handler: nil)
-            alert.addAction(okAction)
-            presentViewController(alert, animated: true, completion: nil)
+            showGPSError()
         }
         if CLLocationManager.locationServicesEnabled() {
             locationManager.delegate = self
             locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
             locationManager.startUpdatingLocation()
         }
+    }
+    
+    func showGPSError() {
+        let alert = UIAlertController(title: "Location Services Disable", message: "Please enable location services for this app in Settings.", preferredStyle: .Alert)
+        let okAction = UIAlertAction(title: "OK", style: .Default, handler: nil)
+        alert.addAction(okAction)
+        presentViewController(alert, animated: true, completion: nil)
     }
     
     func stopUpdatingLocation() {
@@ -502,7 +504,6 @@ extension GroceryListViewController: CLLocationManagerDelegate {
     }
     
     func locationManager(manager: CLLocationManager, didChangeAuthorizationStatus status: CLAuthorizationStatus) {
-        print("locationManager didChangeAuthorizationStatus \(status)")
     }
     
 }
