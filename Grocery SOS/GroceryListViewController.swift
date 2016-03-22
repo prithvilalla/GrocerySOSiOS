@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreLocation
 
 class GroceryListViewController: UIViewController, RoutePreviewViewControllerDelegate, CategoryPreferenceViewControllerDelegate, ManagerViewControllerDelegate {
     
@@ -23,15 +24,24 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
     var isLoading = false
     var dataTask: NSURLSessionDataTask?
     let serverUrl = "https://grocery-sos.herokuapp.com"
+    let username = "testmanager"
+    let password = "testmanager"
+    var token: String!
+    var userId: Int!
+    let locationManager = CLLocationManager()
+    var newLocation: CLLocation?
     
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         loadData()
+        isLoading = true
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         doneButton.enabled = false
+        getLocation()
+        getToken()
         // Do any additional setup after loading the view.
     }
     
@@ -171,7 +181,7 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
         do {
             return try NSJSONSerialization.JSONObjectWithData(data, options: []) as? [String:AnyObject]
         } catch {
-            print("JSON Error \(error)")
+            print("parseJSON \(error)")
             return nil
         }
     }
@@ -181,6 +191,97 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
         let action = UIAlertAction(title: "OK", style: .Default, handler: {alert in self.resetGroceryItem()})
         alert.addAction(action)
         presentViewController(alert, animated: false, completion: nil)
+    }
+    
+    func getToken() {
+        let url: NSURL! = NSURL(string: "\(serverUrl)/api/token/local")
+        let request = NSMutableURLRequest(URL: url)
+        request.HTTPMethod = "POST"
+        let parameters: [String: String] = ["username":"\(username)", "password":"\(password)"]
+        do {
+            try request.HTTPBody = NSJSONSerialization.dataWithJSONObject(parameters, options: [])
+        } catch {
+            print("Error HTTP POST Body")
+        }
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        let session = NSURLSession.sharedSession()
+        let task = session.dataTaskWithRequest(request, completionHandler: {data, response, error in
+            if let error = error {
+                print("getToken Error \(error)")
+                return
+            } else if let httpResponse = response as? NSHTTPURLResponse where httpResponse.statusCode == 200 {
+                if let data = data {
+                    let dictionary = self.parseJSON(data)
+                    self.token = dictionary!["token"] as! String
+                    print("Token \(self.token)")
+                    dispatch_async(dispatch_get_main_queue()) {
+                        self.getUserId()
+                    }
+                }
+                return
+            } else {
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.showNetworkError()
+                    print("getToken Failure \(response)")
+                }
+                return
+            }
+        })
+        task.resume()
+    }
+    
+    func getUserId() {
+        let url: NSURL! = NSURL(string: "\(serverUrl)/api/user")
+        let request = NSMutableURLRequest(URL: url)
+        request.HTTPMethod = "GET"
+        request.addValue("JWT \(token)", forHTTPHeaderField: "Authorization")
+        let session = NSURLSession.sharedSession()
+        let task = session.dataTaskWithRequest(request, completionHandler: {data, response, error in
+            if let error = error {
+                print("getUserId Error \(error)")
+                return
+            } else if let httpResponse = response as? NSHTTPURLResponse where httpResponse.statusCode == 200 {
+                if let data = data {
+                    let dictionary = self.parseJSON(data)
+                    self.userId = dictionary!["id"] as! Int
+                    print("UserId \(self.userId)")
+                    dispatch_async(dispatch_get_main_queue()) {
+                        self.isLoading = false
+                        self.searchTable.reloadData()
+                    }
+                }
+                return
+            } else {
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.showNetworkError()
+                    print("getUserId Failure \(response)")
+                }
+                return
+            }
+        })
+        task.resume()
+    }
+    
+    func getLocation() {
+        let authStatus = CLLocationManager.authorizationStatus()
+        if authStatus == .NotDetermined {
+            locationManager.requestWhenInUseAuthorization()
+        } else if authStatus == .Denied || authStatus == .Restricted {
+            let alert = UIAlertController(title: "Location Services Disable", message: "Please enable location services for this app in Settings.", preferredStyle: .Alert)
+            let okAction = UIAlertAction(title: "OK", style: .Default, handler: nil)
+            alert.addAction(okAction)
+            presentViewController(alert, animated: true, completion: nil)
+        }
+        if CLLocationManager.locationServicesEnabled() {
+            locationManager.delegate = self
+            locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+            locationManager.startUpdatingLocation()
+        }
+    }
+    
+    func stopUpdatingLocation() {
+        locationManager.stopUpdatingLocation()
+        locationManager.delegate = nil
     }
 
     /*
@@ -222,15 +323,18 @@ extension GroceryListViewController: UISearchBarDelegate {
             isLoading = true
             searchTable.reloadData()
 
-            let url = self.urlWithSearchText(String(format: "/api/user/available/%@", searchText))
+            let url = urlWithSearchText(String(format: "/api/user/available/%@", searchText))
+            let request = NSMutableURLRequest(URL: url)
+            request.HTTPMethod = "GET"
             let session = NSURLSession.sharedSession()
-            dataTask = session.dataTaskWithURL(url, completionHandler: {data, response, error in
+            dataTask = session.dataTaskWithRequest(request, completionHandler: {data, response, error in
+            //dataTask = session.dataTaskWithURL(url, completionHandler: {data, response, error in
                 if let error = error where error.code == -999 {
+                    print("Error Code -999")
                     return
                 } else if let httpResponse = response as? NSHTTPURLResponse where httpResponse.statusCode == 200 {
                     if let data = data {
                         var dictionary = self.parseJSON(data)
-                        print(dictionary)
                         dictionary?.removeAll(keepCapacity: false)
                         dispatch_async(dispatch_get_main_queue()) {
                             self.isLoading = false
@@ -250,6 +354,7 @@ extension GroceryListViewController: UISearchBarDelegate {
                         self.showNetworkError()
                         print("Failure \(response)")
                     }
+                    return
                 }
             })
             dataTask?.resume()
@@ -380,6 +485,25 @@ extension GroceryListViewController: UITableViewDelegate {
         performSegueWithIdentifier("editCategory", sender: categories[indexPath.section])
     }
     
+    
+}
+
+extension GroceryListViewController: CLLocationManagerDelegate {
+    
+    func locationManager(manager: CLLocationManager, didFailWithError error: NSError) {
+        print("locationManager didFailWithError \(error)")
+    }
+    
+    func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        newLocation = locations.last!
+        print("locationManager didUpdateLocations latitude \(newLocation?.coordinate.latitude)")
+        print("locationManager didUpdateLocations longitude \(newLocation?.coordinate.longitude)")
+        stopUpdatingLocation()
+    }
+    
+    func locationManager(manager: CLLocationManager, didChangeAuthorizationStatus status: CLAuthorizationStatus) {
+        print("locationManager didChangeAuthorizationStatus \(status)")
+    }
     
 }
 
