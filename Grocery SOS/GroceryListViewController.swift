@@ -9,12 +9,16 @@
 import UIKit
 import CoreLocation
 
-class GroceryListViewController: UIViewController, RoutePreviewViewControllerDelegate, CategoryPreferenceViewControllerDelegate, ManagerViewControllerDelegate {
+class GroceryListViewController: UIViewController, RoutePreviewViewControllerDelegate, CategoryPreferenceViewControllerDelegate, ManagerViewControllerDelegate, ProfileViewControllerDelegate {
     
     @IBOutlet weak var searchBar: UISearchBar!
     @IBOutlet weak var searchTable: UITableView!
     @IBOutlet weak var doneButton: UIBarButtonItem!
+    @IBOutlet weak var managerButton: UIBarButtonItem!
+    @IBOutlet weak var profileButton: UIBarButtonItem!
+    @IBOutlet weak var logButton: UIBarButtonItem!
     
+    var categoriesList = [Int: String]()
     var items = [GroceryItem]()
     var searchResults = [GroceryItem]()
     var checkedItems = [GroceryItem]()
@@ -22,31 +26,50 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
     var hasSearched = false
     let emptySearchMessage = "(Nothing found)"
     var isLoading = false
-    var dataTask: NSURLSessionDataTask?
     let serverUrl = "https://grocery-sos.herokuapp.com"
-    let username = "testmanager"
-    let password = "testmanager"
+    var username: String?
+    var password: String?
+    var email: String?
+    var phone: String?
     var token: String!
-    var userId: Int!
+    var userId: Int?
+    var isManager = false
+    var storeName: String?
     let locationManager = CLLocationManager()
     var newLocation: CLLocation?
+    var isLoggedIn: Bool!
+    var refreshControl: UIRefreshControl!
+    var timer: NSTimer!
     
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
-        loadData()
-        isLoading = true
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        refreshControl = UIRefreshControl()
+        searchTable.addSubview(refreshControl)
         doneButton.enabled = false
+        managerButton.enabled = isManager
+        logButton.enabled = false
+        profileButton.enabled = false
         getLocation()
-        getToken()
+        username = "testmanager"
+        password = "testmanager"
+        saveLoginData()
+        loadLoginData()
+        if username == nil {
+            isLoggedIn = false
+            logButton.title = "Login"
+            logButton.enabled = true
+        } else {
+            isLoggedIn = true
+            getToken()
+        }
         // Do any additional setup after loading the view.
     }
     
     override func viewWillAppear(animated: Bool) {
-        items.sortInPlace({(item1: GroceryItem, item2: GroceryItem) -> Bool in item1.name < item2.name})
     }
 
     override func didReceiveMemoryWarning() {
@@ -59,35 +82,68 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
     }
     
     func resetGroceryItem() {
-        for item in items {
-            item.checkmark = false
-        }
-        searchResults.removeAll(keepCapacity: false)
-        checkedItems.removeAll(keepCapacity: false)
-        categories.removeAll(keepCapacity: false)
-        hasSearched = false
-        dataTask?.cancel()
-        isLoading = false
-        searchBar.text = ""
-        searchBar.resignFirstResponder()
-        doneButton.enabled = false
+        isLoading = true
         searchTable.reloadData()
+        let url: NSURL! = NSURL(string: "\(serverUrl)/api/list")
+        let request = NSMutableURLRequest(URL: url)
+        request.HTTPMethod = "DELETE"
+        request.addValue("JWT \(token)", forHTTPHeaderField: "Authorization")
+        let session = NSURLSession.sharedSession()
+        let task = session.dataTaskWithRequest(request, completionHandler: {data, response, error in
+            if let error = error {
+                self.isLoading = false
+                self.searchTable.reloadData()
+                print("resetGroceryItem Error \(error)")
+                return
+            } else if let httpResponse = response as? NSHTTPURLResponse where httpResponse.statusCode == 200 {
+                dispatch_async(dispatch_get_main_queue()) {
+                    for item in self.items {
+                        item.checkmark = false
+                    }
+                    self.searchResults.removeAll(keepCapacity: false)
+                    self.checkedItems.removeAll(keepCapacity: false)
+                    self.categories.removeAll(keepCapacity: false)
+                    self.hasSearched = false
+                    self.isLoading = false
+                    self.searchBar.text = ""
+                    self.searchBar.resignFirstResponder()
+                    self.doneButton.enabled = false
+                    self.searchTable.reloadData()
+                }
+                return
+            } else {
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.isLoading = false
+                    self.searchTable.reloadData()
+                    self.showNetworkError()
+                    print("resetGroceryItem Failure \(response)")
+                }
+                return
+            }
+        })
+        task.resume()
     }
     
-    func toggleCheckmark(name: String) {
+    func toggleCheckmark(name: String, addItem: Bool = true) {
         for item in items {
             if item.name == name {
                 if item.checkmark {
                     item.checkmark = false
                     removeCheckedItem(item)
+                    if addItem {
+                        listDeleteItem(item.name)
+                    }
                 } else {
                     item.checkmark = true
                     checkedItems.append(item)
+                    if addItem {
+                        listAddItem(item.name)
+                    }
                 }
             }
         }
         checkedItems.sortInPlace({(item1: GroceryItem, item2: GroceryItem) -> Bool in item1.name < item2.name})
-        doneButton.enabled = (!hasSearched && checkedItems.count > 0)
+        doneButton.enabled = (!hasSearched && checkedItems.count > 0 && !isLoading)
     }
     
     func removeCheckedItem(target: GroceryItem) {
@@ -142,13 +198,34 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
         dismissViewControllerAnimated(true, completion: nil)
     }
     
+    @IBAction func profile(sender: UIBarButtonItem) {
+        performSegueWithIdentifier("profile", sender: nil)
+    }
+    
     @IBAction func managerMode() {
         performSegueWithIdentifier("managerMode", sender: nil)
     }
     
     func managerViewControllerBack(controller: ManagerViewController) {
         dismissViewControllerAnimated(true, completion: nil)
-        loadData()
+    }
+    
+    func profileViewControllerCancel(controller: ProfileViewController) {
+        dismissViewControllerAnimated(true, completion: nil)
+    }
+    
+    func profileViewControllerSave(controller: ProfileViewController) {
+        let newUsername = controller.usernameTextField.text!
+        let newPassword = controller.password
+        let newEmail = controller.emailTextField.text!
+        let newPhone = controller.phoneTextField.text!
+        let newStoreManager = controller.storeManagerSwitch.on
+        if newUsername != username {
+            userAvailable(newUsername, newPassword: newPassword, newEmail: newEmail, newPhone: newPhone, newStoreManager: newStoreManager)
+        } else {
+            userEdit(newUsername, newPassword: newPassword, newEmail: newEmail, newPhone: newPhone, newStoreManager: newStoreManager)
+        }
+        dismissViewControllerAnimated(true, completion: nil)
     }
     
     func documentsDirectory() -> String {
@@ -157,25 +234,48 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
     }
     
     func dataFilePath() -> String {
-        return (documentsDirectory() as NSString).stringByAppendingPathComponent("GrocerySOSManager.plist")
+        return (documentsDirectory() as NSString).stringByAppendingPathComponent("GrocerySOS.plist")
     }
     
-    func loadData() {
+    func saveLoginData() {
+        let data = NSMutableData()
+        let archiver = NSKeyedArchiver(forWritingWithMutableData: data)
+        archiver.encodeObject(username, forKey: "username")
+        archiver.encodeObject(password, forKey: "password")
+        archiver.finishEncoding()
+        data.writeToFile(dataFilePath(), atomically: true)
+    }
+    
+    func loadLoginData() {
         let path = dataFilePath()
         if NSFileManager.defaultManager().fileExistsAtPath(path) {
             if let data = NSData(contentsOfFile: path) {
                 let unarchiver = NSKeyedUnarchiver(forReadingWithData: data)
-                items = unarchiver.decodeObjectForKey("managerInventory") as! [GroceryItem]
+                username = unarchiver.decodeObjectForKey("username") as? String
+                password = unarchiver.decodeObjectForKey("password") as? String
             }
         }
     }
     
-    func urlWithSearchText(searchText: String) -> NSURL {
+    func loadData(data: [String:AnyObject]) {
+        items.removeAll(keepCapacity: false)
+        let allItems = data["items"] as! [AnyObject]
+        for item in allItems {
+            let name = item["name"] as! String
+            let category1 = item["category"] as! Int
+            let category = categoriesList[category1]!
+            let descript = item["description"] as! String
+            items.append(GroceryItem(name: name, category: category, descript: descript))
+        }
+        items.sortInPlace({(item1: GroceryItem, item2: GroceryItem) -> Bool in item1.name < item2.name})
+    }
+    
+    /*func urlWithSearchText(searchText: String) -> NSURL {
         let escapedSearchText = searchText.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())!
         let urlString = String(format: "%@%@", serverUrl, escapedSearchText)
         let url = NSURL(string: urlString)
         return url!
-    }
+    }*/
     
     func parseJSON(data: NSData) -> [String:AnyObject]? {
         do {
@@ -188,16 +288,25 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
     
     func showNetworkError() {
         let alert = UIAlertController(title: "Error", message: "There seems to be a connectivity issue. Please try again.", preferredStyle: .Alert)
-        let action = UIAlertAction(title: "OK", style: .Default, handler: {alert in self.resetGroceryItem()})
+        let action = UIAlertAction(title: "OK", style: .Default, handler: nil)
+        alert.addAction(action)
+        presentViewController(alert, animated: false, completion: nil)
+    }
+    
+    func showUsernameError() {
+        let alert = UIAlertController(title: "Error", message: "There seems to be a username issue. Please try again or another username.", preferredStyle: .Alert)
+        let action = UIAlertAction(title: "OK", style: .Default, handler: nil)
         alert.addAction(action)
         presentViewController(alert, animated: false, completion: nil)
     }
     
     func getToken() {
+        isLoading = true
+        searchTable.reloadData()
         let url: NSURL! = NSURL(string: "\(serverUrl)/api/token/local")
         let request = NSMutableURLRequest(URL: url)
         request.HTTPMethod = "POST"
-        let parameters: [String: String] = ["username":"\(username)", "password":"\(password)"]
+        let parameters: [String: String] = ["username":"\(username!)", "password":"\(password!)"]
         do {
             try request.HTTPBody = NSJSONSerialization.dataWithJSONObject(parameters, options: [])
         } catch {
@@ -207,6 +316,8 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
         let session = NSURLSession.sharedSession()
         let task = session.dataTaskWithRequest(request, completionHandler: {data, response, error in
             if let error = error {
+                self.isLoading = false
+                self.searchTable.reloadData()
                 print("getToken Error \(error)")
                 return
             } else if let httpResponse = response as? NSHTTPURLResponse where httpResponse.statusCode == 200 {
@@ -214,12 +325,14 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
                     let dictionary = self.parseJSON(data)
                     self.token = dictionary!["token"] as! String
                     dispatch_async(dispatch_get_main_queue()) {
-                        self.getUserId()
+                        self.getUserInfo()
                     }
                 }
                 return
             } else {
                 dispatch_async(dispatch_get_main_queue()) {
+                    self.isLoading = false
+                    self.searchTable.reloadData()
                     self.showNetworkError()
                     print("getToken Failure \(response)")
                 }
@@ -229,7 +342,9 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
         task.resume()
     }
     
-    func getUserId() {
+    func getUserInfo() {
+        isLoading = true
+        searchTable.reloadData()
         let url: NSURL! = NSURL(string: "\(serverUrl)/api/user")
         let request = NSMutableURLRequest(URL: url)
         request.HTTPMethod = "GET"
@@ -237,20 +352,31 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
         let session = NSURLSession.sharedSession()
         let task = session.dataTaskWithRequest(request, completionHandler: {data, response, error in
             if let error = error {
+                self.isLoading = false
+                self.searchTable.reloadData()
                 print("getUserId Error \(error)")
                 return
             } else if let httpResponse = response as? NSHTTPURLResponse where httpResponse.statusCode == 200 {
                 if let data = data {
                     let dictionary = self.parseJSON(data)
-                    self.userId = dictionary!["id"] as! Int
+                    self.userId = dictionary!["id"] as? Int
+                    self.email = dictionary!["email"] as? String
+                    self.phone = dictionary!["phone"] as? String
+                    self.isManager = dictionary!["isManager"] as! Bool
+                    if self.isManager {
+                        let stores = dictionary!["stores"]
+                        let store = stores![0]["data"] as! [String: AnyObject]
+                        self.storeName = store["name"] as? String
+                    }
                     dispatch_async(dispatch_get_main_queue()) {
-                        self.isLoading = false
-                        self.searchTable.reloadData()
+                        self.categoryGetAll()
                     }
                 }
                 return
             } else {
                 dispatch_async(dispatch_get_main_queue()) {
+                    self.isLoading = false
+                    self.searchTable.reloadData()
                     self.showNetworkError()
                     print("getUserId Failure \(response)")
                 }
@@ -259,6 +385,293 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
         })
         task.resume()
     }
+    
+    func userAvailable(newUsername: String, newPassword: String, newEmail: String, newPhone: String, newStoreManager: Bool, edit: Bool = true) {
+        isLoading = true
+        searchTable.reloadData()
+        let url: NSURL! = NSURL(string: "\(serverUrl)/api/user/available/\(newUsername)")
+        let request = NSMutableURLRequest(URL: url)
+        request.HTTPMethod = "GET"
+        let session = NSURLSession.sharedSession()
+        let task = session.dataTaskWithRequest(request, completionHandler: {data, response, error in
+            if let error = error {
+                self.isLoading = false
+                self.searchTable.reloadData()
+                print("userAvailable Error \(error)")
+                return
+            } else if let httpResponse = response as? NSHTTPURLResponse where httpResponse.statusCode == 200 {
+                if let data = data {
+                    let dictionary = self.parseJSON(data)
+                    let available = dictionary!["available"] as! Bool
+                    dispatch_async(dispatch_get_main_queue()) {
+                        if !available {
+                            self.isLoading = false
+                            self.searchTable.reloadData()
+                            self.showUsernameError()
+                        } else if edit{
+                            self.userEdit(newUsername, newPassword: newPassword, newEmail: newEmail, newPhone: newPhone, newStoreManager: newStoreManager)
+                        }
+                    }
+                }
+                return
+            } else {
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.isLoading = false
+                    self.searchTable.reloadData()
+                    self.showNetworkError()
+                    print("userAvailable Failure \(response)")
+                }
+                return
+            }
+        })
+        task.resume()
+    }
+    
+    func userEdit(newUsername: String, newPassword: String, newEmail: String, newPhone: String, newStoreManager: Bool) {
+        isLoading = true
+        searchTable.reloadData()
+        let url: NSURL! = NSURL(string: "\(serverUrl)/api/user/edit")
+        let request = NSMutableURLRequest(URL: url)
+        request.HTTPMethod = "POST"
+        request.addValue("JWT \(token)", forHTTPHeaderField: "Authorization")
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        let parameters: [String: AnyObject] = ["username": "\(newUsername)", "password": "\(newPassword)", "email": "\(newEmail)", "phone": "\(newPhone)", "isManager": newStoreManager]
+        do {
+            try request.HTTPBody = NSJSONSerialization.dataWithJSONObject(parameters, options: [])
+        } catch {
+            print("Error HTTP POST Body")
+        }
+        let session = NSURLSession.sharedSession()
+        let task = session.dataTaskWithRequest(request, completionHandler: {data, response, error in
+            if let error = error {
+                self.isLoading = false
+                self.searchTable.reloadData()
+                print("userEdit Error \(error)")
+                return
+            } else if let httpResponse = response as? NSHTTPURLResponse where httpResponse.statusCode == 200 {
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.username = newUsername
+                    self.password = newPassword
+                    self.saveLoginData()
+                    self.getToken()
+                }
+                return
+            } else {
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.isLoading = false
+                    self.searchTable.reloadData()
+                    self.showNetworkError()
+                    print("userEdit Failure \(response)")
+                }
+                return
+            }
+        })
+        task.resume()
+    }
+    
+    func categoryGetAll() {
+        isLoading = true
+        searchTable.reloadData()
+        categoriesList.removeAll(keepCapacity: false)
+        let url: NSURL! = NSURL(string: "\(serverUrl)/api/category/all")
+        let request = NSMutableURLRequest(URL: url)
+        request.HTTPMethod = "GET"
+        let session = NSURLSession.sharedSession()
+        let task = session.dataTaskWithRequest(request, completionHandler: {data, response, error in
+            if let error = error {
+                self.isLoading = false
+                self.searchTable.reloadData()
+                print("categoryGetAll Error \(error)")
+            } else if let httpResponse = response as? NSHTTPURLResponse where httpResponse.statusCode == 200 {
+                if let data = data {
+                    let dictionary = self.parseJSON(data)
+                    let categoryArray = dictionary!["categories"] as! [AnyObject]
+                    for i in 0...(categoryArray.count - 1) {
+                        let category = categoryArray[i] as! [String: AnyObject]
+                        let id = category["id"] as! Int
+                        let name = category["name"] as! String
+                        self.categoriesList[id] = name
+                    }
+                    dispatch_async(dispatch_get_main_queue()) {
+                        self.itemGetAll()
+                    }
+                }
+            } else {
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.isLoading = false
+                    self.searchTable.reloadData()
+                    self.showNetworkError()
+                    print("categoryGetAll Failure \(response)")
+                }
+            }
+        })
+        task.resume()
+    }
+    
+    func itemGetAll() {
+        isLoading = true
+        searchTable.reloadData()
+        items.removeAll(keepCapacity: false)
+        searchResults.removeAll(keepCapacity: false)
+        checkedItems.removeAll(keepCapacity: false)
+        let url: NSURL! = NSURL(string: "\(serverUrl)/api/item/getAll")
+        let request = NSMutableURLRequest(URL: url)
+        request.HTTPMethod = "GET"
+        request.addValue("JWT \(token)", forHTTPHeaderField: "Authorization")
+        let session = NSURLSession.sharedSession()
+        let task = session.dataTaskWithRequest(request, completionHandler: {data, response, error in
+            if let error = error {
+                self.isLoading = false
+                self.searchTable.reloadData()
+                print("itemGetAll Error \(error)")
+                return
+            } else if let httpResponse = response as? NSHTTPURLResponse where httpResponse.statusCode == 200 {
+                if let data = data {
+                    let dictionary = self.parseJSON(data)
+                    self.loadData(dictionary!)
+                    dispatch_async(dispatch_get_main_queue()) {
+                        self.listGetItems()
+                    }
+                    return
+                }
+            } else {
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.isLoading = false
+                    self.searchTable.reloadData()
+                    self.showNetworkError()
+                    print("itemGetAll Failure \(response)")
+                }
+                return
+            }
+        })
+        task.resume()
+    }
+    
+    func listGetItems() {
+        isLoading = true
+        searchTable.reloadData()
+        let url: NSURL! = NSURL(string: "\(serverUrl)/api/list/getItems")
+        let request = NSMutableURLRequest(URL: url)
+        request.HTTPMethod = "GET"
+        request.addValue("JWT \(token)", forHTTPHeaderField: "Authorization")
+        let session = NSURLSession.sharedSession()
+        let task = session.dataTaskWithRequest(request, completionHandler: {data, response, error in
+            if let error = error {
+                self.isLoading = false
+                self.searchTable.reloadData()
+                print("listGetItems Error \(error)")
+                return
+            } else if let httpResponse = response as? NSHTTPURLResponse where httpResponse.statusCode == 200 {
+                if let data = data {
+                    let dictionary = self.parseJSON(data)
+                    let itemList = dictionary!["items"] as! [AnyObject]
+                    for item in itemList {
+                        let name = item["name"] as! String
+                        self.toggleCheckmark(name, addItem: false)
+                    }
+                    dispatch_async(dispatch_get_main_queue()) {
+                        self.isLoading = false
+                        self.logButton.title = "Logout"
+                        self.logButton.enabled = true
+                        self.profileButton.enabled = true
+                        self.searchTable.reloadData()
+                        self.managerButton.enabled = self.isManager
+                    }
+                    return
+                }
+            } else {
+                self.isLoading = false
+                self.searchTable.reloadData()
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.showNetworkError()
+                    print("itemGetAll Failure \(response)")
+                }
+                return
+            }
+        })
+        task.resume()
+    }
+    
+    func listAddItem(name: String) {
+        isLoading = true
+        searchTable.reloadData()
+        let url: NSURL! = NSURL(string: "\(serverUrl)/api/list/addItem")
+        let request = NSMutableURLRequest(URL: url)
+        request.HTTPMethod = "POST"
+        request.addValue("JWT \(token)", forHTTPHeaderField: "Authorization")
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        let parameters: [String: String] = ["item":"\(name)"]
+        do {
+            try request.HTTPBody = NSJSONSerialization.dataWithJSONObject(parameters, options: [])
+        } catch {
+            print("Error HTTP POST Body")
+        }
+        let session = NSURLSession.sharedSession()
+        let task = session.dataTaskWithRequest(request, completionHandler: {data, response, error in
+            if let error = error {
+                self.isLoading = false
+                self.searchTable.reloadData()
+                print("listGetItems Error \(error)")
+                return
+            } else if let httpResponse = response as? NSHTTPURLResponse where httpResponse.statusCode == 200 {
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.isLoading = false
+                    self.searchTable.reloadData()
+                }
+                return
+            } else {
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.isLoading = false
+                    self.searchTable.reloadData()
+                    self.showNetworkError()
+                    print("itemGetAll Failure \(response)")
+                }
+                return
+            }
+        })
+        task.resume()
+    }
+    
+    func listDeleteItem(name: String) {
+        isLoading = true
+        searchTable.reloadData()
+        let url: NSURL! = NSURL(string: "\(serverUrl)/api/list/deleteItem")
+        let request = NSMutableURLRequest(URL: url)
+        request.HTTPMethod = "POST"
+        request.addValue("JWT \(token)", forHTTPHeaderField: "Authorization")
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        let parameters: [String: String] = ["item":"\(name)"]
+        do {
+            try request.HTTPBody = NSJSONSerialization.dataWithJSONObject(parameters, options: [])
+        } catch {
+            print("Error HTTP POST Body")
+        }
+        let session = NSURLSession.sharedSession()
+        let task = session.dataTaskWithRequest(request, completionHandler: {data, response, error in
+            if let error = error {
+                self.isLoading = false
+                self.searchTable.reloadData()
+                print("listGetItems Error \(error)")
+                return
+            } else if let httpResponse = response as? NSHTTPURLResponse where httpResponse.statusCode == 200 {
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.isLoading = false
+                    self.searchTable.reloadData()
+                }
+                return
+            } else {
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.isLoading = false
+                    self.searchTable.reloadData()
+                    self.showNetworkError()
+                    print("itemGetAll Failure \(response)")
+                }
+                return
+            }
+        })
+        task.resume()
+    }
+
     
     func getLocation() {
         let authStatus = CLLocationManager.authorizationStatus()
@@ -284,6 +697,24 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
     func stopUpdatingLocation() {
         locationManager.stopUpdatingLocation()
         locationManager.delegate = nil
+    }
+    
+    func startRefresh() {
+        getLocation()
+        getToken()
+        timer = NSTimer.scheduledTimerWithTimeInterval(1.0, target: self, selector: "endRefresh", userInfo: nil, repeats: true)
+    }
+    
+    func endRefresh() {
+        refreshControl.endRefreshing()
+        timer.invalidate()
+        timer = nil
+    }
+    
+    func scrollViewDidEndDecelerating(scrollView: UIScrollView) {
+        if refreshControl.refreshing {
+            startRefresh()
+        }
     }
 
     /*
@@ -311,6 +742,19 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
             let navigationController = segue.destinationViewController as! UINavigationController
             let controller = navigationController.topViewController as! ManagerViewController
             controller.delegate = self
+            controller.storeName = storeName
+            controller.token = token
+            controller.serverUrl = serverUrl
+            controller.categoriesList = categoriesList
+        } else if segue.identifier == "profile" {
+            let navigationController = segue.destinationViewController as! UINavigationController
+            let controller = navigationController.topViewController as! ProfileViewController
+            controller.delegate = self
+            controller.username = username!
+            controller.password = password!
+            controller.email = email!
+            controller.phone = phone!
+            controller.isManager = isManager
         }
     }
 
@@ -319,47 +763,16 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
 extension GroceryListViewController: UISearchBarDelegate {
     
     func searchBar(searchBar: UISearchBar, textDidChange searchText: String) {
-        dataTask?.cancel()
         if searchText != "" {
             hasSearched = true
-            isLoading = true
-            searchTable.reloadData()
-
-            let url = urlWithSearchText(String(format: "/api/user/available/%@", searchText))
-            let request = NSMutableURLRequest(URL: url)
-            request.HTTPMethod = "GET"
-            let session = NSURLSession.sharedSession()
-            dataTask = session.dataTaskWithRequest(request, completionHandler: {data, response, error in
-            //dataTask = session.dataTaskWithURL(url, completionHandler: {data, response, error in
-                if let error = error where error.code == -999 {
-                    print("Error Code -999")
-                    return
-                } else if let httpResponse = response as? NSHTTPURLResponse where httpResponse.statusCode == 200 {
-                    if let data = data {
-                        var dictionary = self.parseJSON(data)
-                        dictionary?.removeAll(keepCapacity: false)
-                        dispatch_async(dispatch_get_main_queue()) {
-                            self.isLoading = false
-                            self.searchResults.removeAll(keepCapacity: false)
-                            for item in self.items {
-                                if item.name.contains(searchBar.text!) {
-                                    self.searchResults.append(item)
-                                }
-                            }
-                            self.searchResults.sortInPlace({(item1: GroceryItem, item2: GroceryItem) -> Bool in item1.name < item2.name})
-                            self.searchTable.reloadData()
-                        }
-                        return
-                    }
-                } else {
-                    dispatch_async(dispatch_get_main_queue()) {
-                        self.showNetworkError()
-                        print("Failure \(response)")
-                    }
-                    return
+            searchResults.removeAll(keepCapacity: false)
+            for item in items {
+                if item.name.contains(searchBar.text!) {
+                    searchResults.append(item)
                 }
-            })
-            dataTask?.resume()
+            }
+            searchResults.sortInPlace({(item1: GroceryItem, item2: GroceryItem) -> Bool in item1.name < item2.name})
+            searchTable.reloadData()
         } else {
             hasSearched = false
             isLoading = false
@@ -369,10 +782,8 @@ extension GroceryListViewController: UISearchBarDelegate {
     }
     
     func searchBarTextDidEndEditing(searchBar: UISearchBar) {
-        dataTask?.cancel()
         searchBar.text = ""
         hasSearched = false
-        isLoading = false
         searchTable.reloadData()
     }
     
@@ -415,7 +826,7 @@ extension GroceryListViewController: UITableViewDataSource {
             cell.textLabel!.text = checkedItems[position].name
             cell.accessoryType = .Checkmark
         }
-        doneButton.enabled = (!hasSearched && checkedItems.count > 0)
+        doneButton.enabled = (!hasSearched && checkedItems.count > 0 && !isLoading)
         return cell
     }
     
@@ -498,8 +909,6 @@ extension GroceryListViewController: CLLocationManagerDelegate {
     
     func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         newLocation = locations.last!
-        print("locationManager didUpdateLocations latitude \(newLocation?.coordinate.latitude)")
-        print("locationManager didUpdateLocations longitude \(newLocation?.coordinate.longitude)")
         stopUpdatingLocation()
     }
     

@@ -21,17 +21,22 @@ class ManagerViewController: UIViewController, ManagerModifyViewControllerDelega
     @IBOutlet weak var cityButton: UIButton!
     @IBOutlet weak var stateButton: UIButton!
     @IBOutlet weak var zipButton: UIButton!
+    var categoriesList: [Int: String]!
     var information = [String: String]()
     var inventory = [GroceryItem]()
     var categories = [String]()
+    var token: String!
+    var storeName: String!
+    var serverUrl: String!
+    var isLoading = false
+    
     
     weak var delegate: ManagerViewControllerDelegate?
     
     required init?(coder aDecoder: NSCoder) {
         
         super.init(coder: aDecoder)
-        
-        loadData()
+        isLoading = true
     }
 
     override func viewDidLoad() {
@@ -47,6 +52,9 @@ class ManagerViewController: UIViewController, ManagerModifyViewControllerDelega
             information["State"] = "BLANK"
             information["Zip"] = "BLANK"
         }
+        
+        information["Name"] = storeName
+        itemGetAll()
 
         // Do any additional setup after loading the view.
     }
@@ -58,8 +66,6 @@ class ManagerViewController: UIViewController, ManagerModifyViewControllerDelega
         cityButton.setTitle(information["City"], forState: UIControlState.Normal)
         stateButton.setTitle(information["State"], forState: UIControlState.Normal)
         zipButton.setTitle(information["Zip"], forState: UIControlState.Normal)
-        
-        inventory.sortInPlace({(item1: GroceryItem, item2: GroceryItem) -> Bool in item1.name < item2.name})
     }
 
     override func didReceiveMemoryWarning() {
@@ -79,12 +85,12 @@ class ManagerViewController: UIViewController, ManagerModifyViewControllerDelega
         if !controller.addItem {
             information[controller.field] = controller.entry
         } else {
-            inventory.append(GroceryItem(name: controller.entry, category: controller.category, descript: controller.descript))
+            inventory.append(GroceryItem(name: controller.entry, category: controller.category!, descript: controller.descript))
             inventory.sortInPlace({(item1: GroceryItem, item2: GroceryItem) -> Bool in item1.name < item2.name})
         }
         dismissViewControllerAnimated(true, completion: nil)
         tableView.reloadData()
-        saveData()
+        //saveData()
     }
     
     @IBAction func nameEdit(sender: UIButton) {
@@ -155,24 +161,64 @@ class ManagerViewController: UIViewController, ManagerModifyViewControllerDelega
         return (documentsDirectory() as NSString).stringByAppendingPathComponent("GrocerySOSManager.plist")
     }
     
-    func saveData() {
-        let data = NSMutableData()
-        let archiver = NSKeyedArchiver(forWritingWithMutableData: data)
-        archiver.encodeObject(inventory, forKey: "managerInventory")
-        archiver.encodeObject(information, forKey: "managerInformation")
-        archiver.finishEncoding()
-        data.writeToFile(dataFilePath(), atomically: true)
+    func loadData(data: [String:AnyObject]) {
+        inventory.removeAll(keepCapacity: false)
+        let items = data["items"] as! [AnyObject]
+        for item in items {
+            let name = item["name"] as! String
+            let category1 = item["category"] as! Int
+            let category = categoriesList[category1]!
+            let descript = item["description"] as! String
+            inventory.append(GroceryItem(name: name, category: category, descript: descript))
+        }
+        inventory.sortInPlace({(item1: GroceryItem, item2: GroceryItem) -> Bool in item1.name < item2.name})
     }
     
-    func loadData() {
-        let path = dataFilePath()
-        if NSFileManager.defaultManager().fileExistsAtPath(path) {
-            if let data = NSData(contentsOfFile: path) {
-                let unarchiver = NSKeyedUnarchiver(forReadingWithData: data)
-                inventory = unarchiver.decodeObjectForKey("managerInventory") as! [GroceryItem]
-                information = unarchiver.decodeObjectForKey("managerInformation") as! [String:String]
-            }
+    func parseJSON(data: NSData) -> [String:AnyObject]? {
+        do {
+            return try NSJSONSerialization.JSONObjectWithData(data, options: []) as? [String:AnyObject]
+        } catch {
+            print("parseJSON \(error)")
+            return nil
         }
+    }
+    
+    func showNetworkError() {
+        let alert = UIAlertController(title: "Error", message: "There seems to be a connectivity issue. Please try again.", preferredStyle: .Alert)
+        let action = UIAlertAction(title: "OK", style: .Default, handler: nil)
+        alert.addAction(action)
+        presentViewController(alert, animated: true, completion: nil)
+    }
+    
+    func itemGetAll() {
+        let url: NSURL! = NSURL(string: "\(serverUrl)/api/item/getAll")
+        let request = NSMutableURLRequest(URL: url)
+        request.HTTPMethod = "GET"
+        request.addValue("JWT \(token)", forHTTPHeaderField: "Authorization")
+        let session = NSURLSession.sharedSession()
+        let task = session.dataTaskWithRequest(request, completionHandler: {data, response, error in
+            if let error = error {
+                print("itemGetAll Error \(error)")
+                return
+            } else if let httpResponse = response as? NSHTTPURLResponse where httpResponse.statusCode == 200 {
+                if let data = data {
+                    let dictionary = self.parseJSON(data)
+                    self.loadData(dictionary!)
+                    dispatch_async(dispatch_get_main_queue()) {
+                        self.isLoading = false
+                        self.tableView.reloadData()
+                    }
+                    return
+                }
+            } else {
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.showNetworkError()
+                    print("itemGetAll Failure \(response)")
+                }
+                return
+            }
+        })
+        task.resume()
     }
     
     /*
@@ -201,6 +247,12 @@ class ManagerViewController: UIViewController, ManagerModifyViewControllerDelega
             controller.field = "Add Item"
             controller.data = ""
             controller.addItem = true
+            var allCategories = [String]()
+            for (_, name) in categoriesList {
+                allCategories.append(name)
+            }
+            allCategories.sortInPlace()
+            controller.categories = allCategories
         }
     }
 
@@ -213,11 +265,14 @@ extension ManagerViewController: UITableViewDelegate {
     }
     
     func tableView(tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        let cellIdentifier = "HeaderViewCell"
-        let cell: UITableViewCell! = tableView.dequeueReusableCellWithIdentifier(cellIdentifier)
-        cell.textLabel!.text = categories[section]
-        cell.textLabel!.textColor = UIColor.whiteColor()
-        return cell
+        if !isLoading {
+            let cellIdentifier = "HeaderViewCell"
+            let cell: UITableViewCell! = tableView.dequeueReusableCellWithIdentifier(cellIdentifier)
+            cell.textLabel!.text = categories[section]
+            cell.textLabel!.textColor = UIColor.whiteColor()
+            return cell
+        }
+        return nil
     }
 
 }
@@ -225,24 +280,29 @@ extension ManagerViewController: UITableViewDelegate {
 extension ManagerViewController: UITableViewDataSource {
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cellIdentifier = "TableViewCell"
+        let cellIdentifier = isLoading ? "LoadingViewCell" : "TableViewCell"
         let cell: UITableViewCell! = tableView.dequeueReusableCellWithIdentifier(cellIdentifier)
+        if isLoading {
+            let activityIndicator = cell.viewWithTag(100) as? UIActivityIndicatorView
+            activityIndicator?.startAnimating()
+            return cell
+        }
         let position = positionInArray(inventory, indexPath: indexPath)
         cell.textLabel!.text = inventory[position].name
         return cell
     }
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return numberOfRowsPerSection(inventory, section: section)
+        return isLoading ? 1 : numberOfRowsPerSection(inventory, section: section)
     }
     
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         constructCategories(inventory)
-        return categories.count
+        return isLoading ? 1 : categories.count
     }
     
     func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
-        return true
+        return !isLoading
     }
     
     func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
@@ -250,7 +310,7 @@ extension ManagerViewController: UITableViewDataSource {
         inventory.removeAtIndex(position)
         constructCategories(inventory)
         tableView.reloadData()
-        saveData()
+        //saveData()
     }
     
 }

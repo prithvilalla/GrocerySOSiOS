@@ -23,10 +23,10 @@ class ManagerModifyViewController: UIViewController {
     var field: String!
     var data: String!
     var entry: String!
-    var category: String!
+    var category: String?
     var descript: String!
     var addItem: Bool!
-    var categories = [String]()
+    var categories: [String]?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -40,9 +40,7 @@ class ManagerModifyViewController: UIViewController {
         categoryPicker.hidden = !addItem
         descriptionTextField.hidden = !addItem
         
-        categories = ["Dairy", "Meat", "Bakery", "Vegetables", "Fruits", "Beverages", "Miscellaneous"]
-        categories.sortInPlace()
-        category = categories[0]
+        category = categories?[0]
         
         descript = ""
         // Do any additional setup after loading the view.
@@ -103,16 +101,16 @@ extension ManagerModifyViewController: UIPickerViewDataSource {
     }
     
     func pickerView(pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        return categories.count
+        return categories == nil ? 1 : categories!.count
     }
 }
 
 extension ManagerModifyViewController: UIPickerViewDelegate {
     func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-        return categories[row]
+        return categories?[row]
     }
     
     func pickerView(pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        category = categories[row]
+        category = categories?[row]
     }
 }
