@@ -26,7 +26,7 @@ class ManagerViewController: UIViewController, ManagerModifyViewControllerDelega
     var inventory = [GroceryItem]()
     var categories = [String]()
     var token: String!
-    var storeName: String!
+    var storeName: String?
     var serverUrl: String!
     var isLoading = false
     
@@ -53,7 +53,9 @@ class ManagerViewController: UIViewController, ManagerModifyViewControllerDelega
             information["Zip"] = "BLANK"
         }
         
-        information["Name"] = storeName
+        if let storeName = storeName {
+            information["Name"] = storeName
+        }
         itemGetAll()
 
         // Do any additional setup after loading the view.
@@ -82,15 +84,14 @@ class ManagerViewController: UIViewController, ManagerModifyViewControllerDelega
     }
     
     func managerModifyViewControllerSave(controller: ManagerModifyViewController) {
+        dismissViewControllerAnimated(true, completion: nil)
         if !controller.addItem {
             information[controller.field] = controller.entry
         } else {
-            inventory.append(GroceryItem(name: controller.entry, category: controller.category!, descript: controller.descript))
-            inventory.sortInPlace({(item1: GroceryItem, item2: GroceryItem) -> Bool in item1.name < item2.name})
+            let newItem = GroceryItem(name: controller.entry, category: controller.category!, descript: controller.descript)
+            itemCreate(newItem)
         }
-        dismissViewControllerAnimated(true, completion: nil)
         tableView.reloadData()
-        //saveData()
     }
     
     @IBAction func nameEdit(sender: UIButton) {
@@ -191,6 +192,8 @@ class ManagerViewController: UIViewController, ManagerModifyViewControllerDelega
     }
     
     func itemGetAll() {
+        isLoading = true
+        tableView.reloadData()
         let url: NSURL! = NSURL(string: "\(serverUrl)/api/item/getAll")
         let request = NSMutableURLRequest(URL: url)
         request.HTTPMethod = "GET"
@@ -198,6 +201,8 @@ class ManagerViewController: UIViewController, ManagerModifyViewControllerDelega
         let session = NSURLSession.sharedSession()
         let task = session.dataTaskWithRequest(request, completionHandler: {data, response, error in
             if let error = error {
+                self.isLoading = false
+                self.tableView.reloadData()
                 print("itemGetAll Error \(error)")
                 return
             } else if let httpResponse = response as? NSHTTPURLResponse where httpResponse.statusCode == 200 {
@@ -212,8 +217,95 @@ class ManagerViewController: UIViewController, ManagerModifyViewControllerDelega
                 }
             } else {
                 dispatch_async(dispatch_get_main_queue()) {
+                    self.isLoading = false
+                    self.tableView.reloadData()
                     self.showNetworkError()
                     print("itemGetAll Failure \(response)")
+                }
+                return
+            }
+        })
+        task.resume()
+    }
+    
+    func itemCreate(newItem: GroceryItem) {
+        isLoading = true
+        tableView.reloadData()
+        let url: NSURL! = NSURL(string: "\(serverUrl)/api/item/create")
+        let request = NSMutableURLRequest(URL: url)
+        request.HTTPMethod = "POST"
+        request.addValue("JWT \(token)", forHTTPHeaderField: "Authorization")
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        let parameters: [String: String] = ["name": "\(newItem.name)", "description": "\(newItem.descript)", "category": "\(newItem.category)", "store": "\(information["Name"]!)"]
+        do {
+            try request.HTTPBody = NSJSONSerialization.dataWithJSONObject(parameters, options: [])
+        } catch {
+            print("Error HTTP POST Body")
+        }
+        let session = NSURLSession.sharedSession()
+        let task = session.dataTaskWithRequest(request, completionHandler: {data, response, error in
+            if let error = error {
+                self.isLoading = false
+                self.tableView.reloadData()
+                print("itemCreate Error \(error)")
+                return
+            } else if let httpResponse = response as? NSHTTPURLResponse where httpResponse.statusCode == 200 {
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.isLoading = false
+                    self.inventory.append(newItem)
+                    self.inventory.sortInPlace({(item1: GroceryItem, item2: GroceryItem) -> Bool in item1.name < item2.name})
+                    self.tableView.reloadData()
+                }
+                return
+            } else {
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.isLoading = false
+                    self.tableView.reloadData()
+                    self.showNetworkError()
+                    print("itemCreate Failure \(response)")
+                }
+                return
+            }
+        })
+        task.resume()
+    }
+    
+    func itemDelete(position: Int) {
+        isLoading = true
+        tableView.reloadData()
+        let deleteItem = inventory[position]
+        let url: NSURL! = NSURL(string: "\(serverUrl)/api/item/delete")
+        let request = NSMutableURLRequest(URL: url)
+        request.HTTPMethod = "POST"
+        request.addValue("JWT \(token)", forHTTPHeaderField: "Authorization")
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        let parameters: [String: String] = ["item": "\(deleteItem.name)","store": "\(information["Name"]!)"]
+        do {
+            try request.HTTPBody = NSJSONSerialization.dataWithJSONObject(parameters, options: [])
+        } catch {
+            print("Error HTTP POST Body")
+        }
+        let session = NSURLSession.sharedSession()
+        let task = session.dataTaskWithRequest(request, completionHandler: {data, response, error in
+            if let error = error {
+                self.isLoading = false
+                self.tableView.reloadData()
+                print("itemDelete Error \(error)")
+                return
+            } else if let httpResponse = response as? NSHTTPURLResponse where httpResponse.statusCode == 200 {
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.isLoading = false
+                    self.inventory.removeAtIndex(position)
+                    self.constructCategories(self.inventory)
+                    self.tableView.reloadData()
+                }
+                return
+            } else {
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.isLoading = false
+                    self.tableView.reloadData()
+                    self.showNetworkError()
+                    print("itemDelete Failure \(response)")
                 }
                 return
             }
@@ -307,10 +399,7 @@ extension ManagerViewController: UITableViewDataSource {
     
     func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
         let position = positionInArray(inventory, indexPath: indexPath)
-        inventory.removeAtIndex(position)
-        constructCategories(inventory)
-        tableView.reloadData()
-        //saveData()
+        itemDelete(position)
     }
     
 }

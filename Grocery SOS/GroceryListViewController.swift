@@ -208,6 +208,7 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
     
     func managerViewControllerBack(controller: ManagerViewController) {
         dismissViewControllerAnimated(true, completion: nil)
+        itemGetAll()
     }
     
     func profileViewControllerCancel(controller: ProfileViewController) {
@@ -364,9 +365,11 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
                     self.phone = dictionary!["phone"] as? String
                     self.isManager = dictionary!["isManager"] as! Bool
                     if self.isManager {
-                        let stores = dictionary!["stores"]
-                        let store = stores![0]["data"] as! [String: AnyObject]
-                        self.storeName = store["name"] as? String
+                        let stores = dictionary!["stores"] as? [AnyObject]
+                        if stores?.count != 0 {
+                            let store = stores?[0]["data"] as? [String: AnyObject]
+                            self.storeName = store?["name"] as? String
+                        }
                     }
                     dispatch_async(dispatch_get_main_queue()) {
                         self.categoryGetAll()

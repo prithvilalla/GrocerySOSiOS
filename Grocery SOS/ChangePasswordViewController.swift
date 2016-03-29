@@ -23,7 +23,7 @@ class ChangePasswordViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        currentPassword.becomeFirstResponder()
         // Do any additional setup after loading the view.
     }
 

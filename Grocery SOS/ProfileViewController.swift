@@ -35,6 +35,7 @@ class ProfileViewController: UIViewController, changePasswordViewControllerDeleg
         emailTextField.text = email
         phoneTextField.text = phone
         storeManagerSwitch.on = isManager
+        usernameTextField.becomeFirstResponder()
         // Do any additional setup after loading the view.
     }
 
