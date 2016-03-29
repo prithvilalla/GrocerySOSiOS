@@ -27,7 +27,7 @@
                             </label>
                             <textField opaque="NO" clipsSubviews="YES" tag="1" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Username" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="vuY-RL-kVo">
                                 <rect key="frame" x="-25" y="-30" width="97" height="30"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <textInputTraits key="textInputTraits" enablesReturnKeyAutomatically="YES"/>
                                 <connections>
                                     <outlet property="delegate" destination="R4w-Gn-cn4" id="I0P-xo-gv1"/>
@@ -41,7 +41,7 @@
                             </label>
                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Email" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="ER7-t6-Jpx">
                                 <rect key="frame" x="-25" y="-30" width="97" height="30"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <textInputTraits key="textInputTraits" enablesReturnKeyAutomatically="YES"/>
                             </textField>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Phone:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Qid-MY-uIv">
@@ -52,7 +52,7 @@
                             </label>
                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Phone" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="7zQ-ea-Q7g">
                                 <rect key="frame" x="-25" y="-30" width="97" height="30"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <textInputTraits key="textInputTraits" enablesReturnKeyAutomatically="YES"/>
                             </textField>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Store Manager:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DED-Oc-vHy">
@@ -73,6 +73,7 @@
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Z5i-Uk-aTZ">
                                 <rect key="frame" x="-23" y="-15" width="46" height="30"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <state key="normal" title="Change Password"/>
                                 <connections>
                                     <action selector="changePassword" destination="R4w-Gn-cn4" eventType="touchUpInside" id="3Cj-Eo-IPL"/>
@@ -343,7 +344,11 @@
                             <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3kp-O6-cyQ">
                                 <rect key="frame" x="20" y="556" width="560" height="44"/>
                                 <items>
-                                    <barButtonItem title="Logout" id="opG-vP-9F8"/>
+                                    <barButtonItem title="Logout" id="opG-vP-9F8">
+                                        <connections>
+                                            <action selector="logout:" destination="BYZ-38-t0r" id="NoE-tg-5eP"/>
+                                        </connections>
+                                    </barButtonItem>
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="EKu-3S-UVH"/>
                                     <barButtonItem title="Profile" id="SNa-Z0-qpk">
                                         <connections>
@@ -525,6 +530,7 @@
                         <segue destination="oVa-pa-4XH" kind="presentation" identifier="editCategory" id="dQN-X4-cfB"/>
                         <segue destination="FLa-cG-CFe" kind="presentation" identifier="managerMode" id="wVt-su-DvJ"/>
                         <segue destination="O2k-zq-Y87" kind="presentation" identifier="profile" id="8fS-Z1-kNB"/>
+                        <segue destination="X5w-le-kZw" kind="presentation" identifier="login" id="na4-eK-fRd"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -1307,6 +1313,89 @@
             </objects>
             <point key="canvasLocation" x="4356" y="2124"/>
         </scene>
+        <!--Grocery SOS-->
+        <scene sceneID="Ixp-TW-pnS">
+            <objects>
+                <viewController id="NKJ-Kl-G56" customClass="LoginViewController" customModule="Grocery_SOS" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="FCI-Oo-Y0V"/>
+                        <viewControllerLayoutGuide type="bottom" id="DIl-3E-6YN"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="1z9-Wi-izc">
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Password" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="tKQ-7G-cZ7">
+                                <rect key="frame" x="-25" y="-30" width="97" height="30"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <textInputTraits key="textInputTraits" enablesReturnKeyAutomatically="YES" secureTextEntry="YES"/>
+                                <connections>
+                                    <outlet property="delegate" destination="NKJ-Kl-G56" id="lc5-Fb-3K6"/>
+                                </connections>
+                            </textField>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Username" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="T5g-5P-o84">
+                                <rect key="frame" x="-25" y="-30" width="97" height="30"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <textInputTraits key="textInputTraits" enablesReturnKeyAutomatically="YES"/>
+                                <connections>
+                                    <outlet property="delegate" destination="NKJ-Kl-G56" id="THG-m8-sbg"/>
+                                </connections>
+                            </textField>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstAttribute="trailingMargin" secondItem="tKQ-7G-cZ7" secondAttribute="trailing" constant="10" id="7Zk-1f-7l4"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="T5g-5P-o84" secondAttribute="trailing" constant="10" id="Ulv-dF-GbU"/>
+                            <constraint firstItem="tKQ-7G-cZ7" firstAttribute="leading" secondItem="1z9-Wi-izc" secondAttribute="leadingMargin" constant="10" id="ePn-rc-3xL"/>
+                            <constraint firstItem="tKQ-7G-cZ7" firstAttribute="top" secondItem="T5g-5P-o84" secondAttribute="bottom" constant="10" id="fDl-1e-MzE"/>
+                            <constraint firstItem="T5g-5P-o84" firstAttribute="top" secondItem="FCI-Oo-Y0V" secondAttribute="bottom" constant="50" id="hJp-pc-KNh"/>
+                            <constraint firstItem="T5g-5P-o84" firstAttribute="leading" secondItem="1z9-Wi-izc" secondAttribute="leadingMargin" constant="10" id="sNy-2K-3KP"/>
+                        </constraints>
+                        <variation key="default">
+                            <mask key="subviews">
+                                <exclude reference="tKQ-7G-cZ7"/>
+                                <exclude reference="T5g-5P-o84"/>
+                            </mask>
+                            <mask key="constraints">
+                                <exclude reference="Ulv-dF-GbU"/>
+                                <exclude reference="hJp-pc-KNh"/>
+                                <exclude reference="sNy-2K-3KP"/>
+                                <exclude reference="7Zk-1f-7l4"/>
+                                <exclude reference="ePn-rc-3xL"/>
+                                <exclude reference="fDl-1e-MzE"/>
+                            </mask>
+                        </variation>
+                        <variation key="widthClass=compact">
+                            <mask key="subviews">
+                                <include reference="tKQ-7G-cZ7"/>
+                                <include reference="T5g-5P-o84"/>
+                            </mask>
+                            <mask key="constraints">
+                                <include reference="Ulv-dF-GbU"/>
+                                <include reference="hJp-pc-KNh"/>
+                                <include reference="sNy-2K-3KP"/>
+                                <include reference="7Zk-1f-7l4"/>
+                                <include reference="ePn-rc-3xL"/>
+                                <include reference="fDl-1e-MzE"/>
+                            </mask>
+                        </variation>
+                    </view>
+                    <navigationItem key="navigationItem" title="Grocery SOS" id="ACe-UC-Pog">
+                        <barButtonItem key="leftBarButtonItem" title="Login" id="B40-k5-jVL">
+                            <connections>
+                                <action selector="login" destination="NKJ-Kl-G56" id="d7g-xP-9Dt"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem key="rightBarButtonItem" title="New User?" id="T8v-Ic-b6J"/>
+                    </navigationItem>
+                    <connections>
+                        <outlet property="passwordTextField" destination="tKQ-7G-cZ7" id="2mZ-1O-TS4"/>
+                        <outlet property="usernameTextField" destination="T5g-5P-o84" id="3N4-Ji-JGa"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="1Yf-Wg-6QG" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1995" y="-1461"/>
+        </scene>
         <!--Navigation Controller-->
         <scene sceneID="HSI-x2-MyA">
             <objects>
@@ -1342,6 +1431,24 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="RrW-7a-bG7" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="2955" y="-548"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="O5X-Rh-0CO">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="X5w-le-kZw" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="L07-gg-cuu">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="NKJ-Kl-G56" kind="relationship" relationship="rootViewController" id="PIt-RT-Jl8"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="WTo-0d-lIJ" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1077" y="-1461"/>
         </scene>
     </scenes>
     <resources>

@@ -26,7 +26,12 @@ class ManagerViewController: UIViewController, ManagerModifyViewControllerDelega
     var inventory = [GroceryItem]()
     var categories = [String]()
     var token: String!
-    var storeName: String?
+    var Name: String?
+    var Phone: String?
+    var StreetAddress: String?
+    var City: String?
+    var State: String?
+    var Zip: String?
     var serverUrl: String!
     var isLoading = false
     
@@ -53,8 +58,23 @@ class ManagerViewController: UIViewController, ManagerModifyViewControllerDelega
             information["Zip"] = "BLANK"
         }
         
-        if let storeName = storeName {
-            information["Name"] = storeName
+        if let Name = Name {
+            information["Name"] = Name
+        }
+        if let Phone = Phone {
+            information["Phone"] = Phone
+        }
+        if let StreetAddress = StreetAddress {
+            information["Street Address"] = StreetAddress
+        }
+        if let City = City {
+            information["City"] = City
+        }
+        if let State = State {
+            information["State"] = State
+        }
+        if let Zip = Zip {
+            information["Zip"] = Zip
         }
         itemGetAll()
 

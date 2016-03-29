@@ -19,6 +19,7 @@
 		59494F3F1C82E2450085AF62 /* ManagerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59494F3E1C82E2450085AF62 /* ManagerViewController.swift */; };
 		5978935B1CA9D8FE00B6D000 /* ProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5978935A1CA9D8FE00B6D000 /* ProfileViewController.swift */; };
 		5978935D1CA9FF4500B6D000 /* ChangePasswordViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5978935C1CA9FF4500B6D000 /* ChangePasswordViewController.swift */; };
+		5978935F1CAA473A00B6D000 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5978935E1CAA473A00B6D000 /* LoginViewController.swift */; };
 		59C975041C85793400787737 /* ManagerModifyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59C975031C85793400787737 /* ManagerModifyViewController.swift */; };
 /* End PBXBuildFile section */
 
@@ -37,6 +38,7 @@
 		59494F3E1C82E2450085AF62 /* ManagerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ManagerViewController.swift; sourceTree = "<group>"; };
 		5978935A1CA9D8FE00B6D000 /* ProfileViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfileViewController.swift; sourceTree = "<group>"; };
 		5978935C1CA9FF4500B6D000 /* ChangePasswordViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChangePasswordViewController.swift; sourceTree = "<group>"; };
+		5978935E1CAA473A00B6D000 /* LoginViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
 		59C975031C85793400787737 /* ManagerModifyViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ManagerModifyViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -84,6 +86,7 @@
 				59494F381C7E82460085AF62 /* GroceryItem.swift */,
 				5978935A1CA9D8FE00B6D000 /* ProfileViewController.swift */,
 				5978935C1CA9FF4500B6D000 /* ChangePasswordViewController.swift */,
+				5978935E1CAA473A00B6D000 /* LoginViewController.swift */,
 			);
 			path = "Grocery SOS";
 			sourceTree = "<group>";
@@ -169,6 +172,7 @@
 				59494F3B1C8255D50085AF62 /* RoutePreviewViewController.swift in Sources */,
 				59C975041C85793400787737 /* ManagerModifyViewController.swift in Sources */,
 				5978935B1CA9D8FE00B6D000 /* ProfileViewController.swift in Sources */,
+				5978935F1CAA473A00B6D000 /* LoginViewController.swift in Sources */,
 				59494F251C7D72E80085AF62 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

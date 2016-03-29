@@ -9,7 +9,7 @@
 import UIKit
 import CoreLocation
 
-class GroceryListViewController: UIViewController, RoutePreviewViewControllerDelegate, CategoryPreferenceViewControllerDelegate, ManagerViewControllerDelegate, ProfileViewControllerDelegate {
+class GroceryListViewController: UIViewController, RoutePreviewViewControllerDelegate, CategoryPreferenceViewControllerDelegate, ManagerViewControllerDelegate, ProfileViewControllerDelegate, LoginViewControllerDelegate {
     
     @IBOutlet weak var searchBar: UISearchBar!
     @IBOutlet weak var searchTable: UITableView!
@@ -32,7 +32,6 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
     var email: String?
     var phone: String?
     var token: String!
-    var userId: Int?
     var isManager = false
     var storeName: String?
     let locationManager = CLLocationManager()
@@ -53,20 +52,21 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
         managerButton.enabled = isManager
         logButton.enabled = false
         profileButton.enabled = false
-        getLocation()
-        username = "testmanager"
-        password = "testmanager"
-        saveLoginData()
         loadLoginData()
+        // Do any additional setup after loading the view.
+    }
+    
+    override func viewDidAppear(animated: Bool) {
         if username == nil {
             isLoggedIn = false
             logButton.title = "Login"
             logButton.enabled = true
+            performSegueWithIdentifier("login", sender: nil)
         } else {
             isLoggedIn = true
+            getLocation()
             getToken()
         }
-        // Do any additional setup after loading the view.
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -198,6 +198,13 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
         dismissViewControllerAnimated(true, completion: nil)
     }
     
+    @IBAction func logout(sender: UIBarButtonItem) {
+        username = nil
+        password = nil
+        saveLoginData()
+        performSegueWithIdentifier("login", sender: nil)
+    }
+    
     @IBAction func profile(sender: UIBarButtonItem) {
         performSegueWithIdentifier("profile", sender: nil)
     }
@@ -215,7 +222,9 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
         dismissViewControllerAnimated(true, completion: nil)
     }
     
+    
     func profileViewControllerSave(controller: ProfileViewController) {
+        dismissViewControllerAnimated(true, completion: nil)
         let newUsername = controller.usernameTextField.text!
         let newPassword = controller.password
         let newEmail = controller.emailTextField.text!
@@ -226,7 +235,15 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
         } else {
             userEdit(newUsername, newPassword: newPassword, newEmail: newEmail, newPhone: newPhone, newStoreManager: newStoreManager)
         }
+    }
+    
+    func loginViewControllerLogin(controller: LoginViewController) {
         dismissViewControllerAnimated(true, completion: nil)
+        username = controller.username!
+        password = controller.password!
+        saveLoginData()
+        getLocation()
+        getToken()
     }
     
     func documentsDirectory() -> String {
@@ -360,7 +377,6 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
             } else if let httpResponse = response as? NSHTTPURLResponse where httpResponse.statusCode == 200 {
                 if let data = data {
                     let dictionary = self.parseJSON(data)
-                    self.userId = dictionary!["id"] as? Int
                     self.email = dictionary!["email"] as? String
                     self.phone = dictionary!["phone"] as? String
                     self.isManager = dictionary!["isManager"] as! Bool
@@ -745,7 +761,8 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
             let navigationController = segue.destinationViewController as! UINavigationController
             let controller = navigationController.topViewController as! ManagerViewController
             controller.delegate = self
-            controller.storeName = storeName
+            controller.Name = storeName
+            controller.Phone = phone
             controller.token = token
             controller.serverUrl = serverUrl
             controller.categoriesList = categoriesList
@@ -758,6 +775,11 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
             controller.email = email!
             controller.phone = phone!
             controller.isManager = isManager
+        } else if segue.identifier == "login" {
+            let navigationController = segue.destinationViewController as! UINavigationController
+            let controller = navigationController.topViewController as! LoginViewController
+            controller.delegate = self
+            controller.serverUrl = serverUrl
         }
     }
 
