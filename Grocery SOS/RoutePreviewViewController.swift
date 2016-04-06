@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import GoogleMaps
 
 protocol RoutePreviewViewControllerDelegate: class {
     func routePreviewViewControllerDidCancel(controller: RoutePreviewViewController)
@@ -16,11 +17,13 @@ class RoutePreviewViewController: UIViewController {
     
     weak var delegate: RoutePreviewViewControllerDelegate?
     @IBOutlet weak var routeTable: UITableView!
+    @IBOutlet weak var mapView: GMSMapView!
     var stores = [String]()
+    var myGPS: CLLocation!
     
     required init?(coder aDecoder: NSCoder) {
-        stores.append("Home Depot")
         stores.append("Publix")
+        stores.append("Ace Hardware")
         super.init(coder: aDecoder)
     }
 
@@ -28,7 +31,25 @@ class RoutePreviewViewController: UIViewController {
         super.viewDidLoad()
         routeTable.editing = true
         self.automaticallyAdjustsScrollViewInsets = false
-
+        
+        let latitude = myGPS.coordinate.latitude
+        let longitutde = myGPS.coordinate.longitude
+        
+        let camera = GMSCameraPosition.cameraWithLatitude(latitude, longitude: longitutde, zoom: 10)
+        mapView.camera = camera
+        mapView.myLocationEnabled = true
+        mapView.settings.myLocationButton = true
+        
+        let publix = GMSMarker()
+        publix.position = CLLocationCoordinate2DMake(33.780385, -84.388703)
+        publix.title = "Publix"
+        publix.map = mapView
+        
+        let hardware = GMSMarker()
+        hardware.position = CLLocationCoordinate2DMake(33.778175, -84.382995)
+        hardware.title = "Ace Hardware"
+        hardware.map = mapView
+        
         // Do any additional setup after loading the view.
     }
 
@@ -41,6 +62,13 @@ class RoutePreviewViewController: UIViewController {
         delegate?.routePreviewViewControllerDidCancel(self)
     }
     
+    @IBAction func navigate() {
+        if (UIApplication.sharedApplication().canOpenURL(NSURL(string:"comgooglemaps://")!)) {
+            UIApplication.sharedApplication().openURL(NSURL(string:"comgooglemaps://?saddr=Current+Location&daddr=33.780385,-84.388703&directionsmode=driving")!)
+        } else {
+            print("Can't use comgooglemaps://");
+        }
+    }
 
     /*
     // MARK: - Navigation

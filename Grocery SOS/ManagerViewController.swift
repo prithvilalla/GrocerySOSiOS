@@ -26,6 +26,7 @@ class ManagerViewController: UIViewController, ManagerModifyViewControllerDelega
     var inventory = [GroceryItem]()
     var categories = [String]()
     var token: String!
+    var Id: Int?
     var Name: String?
     var Phone: String?
     var StreetAddress: String?
@@ -156,7 +157,7 @@ class ManagerViewController: UIViewController, ManagerModifyViewControllerDelega
         var count = 0
         for item in searchArray {
             if item.category == categories[section] {
-                count++
+                count += 1
             }
         }
         return count
@@ -214,7 +215,7 @@ class ManagerViewController: UIViewController, ManagerModifyViewControllerDelega
     func itemGetAll() {
         isLoading = true
         tableView.reloadData()
-        let url: NSURL! = NSURL(string: "\(serverUrl)/api/item/getAll")
+        let url: NSURL! = NSURL(string: "\(serverUrl)/api/manager/\(Id!)/items")
         let request = NSMutableURLRequest(URL: url)
         request.HTTPMethod = "GET"
         request.addValue("JWT \(token)", forHTTPHeaderField: "Authorization")

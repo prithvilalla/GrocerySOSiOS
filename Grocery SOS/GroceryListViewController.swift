@@ -33,9 +33,15 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
     var phone: String?
     var token: String!
     var isManager = false
+    var storeId: Int?
     var storeName: String?
+    var storeStreet: String?
+    var storeCity: String?
+    var storeState: String?
+    var storeZip: String?
     let locationManager = CLLocationManager()
     var newLocation: CLLocation?
+    var hasLocation = false
     var isLoggedIn: Bool!
     var refreshControl: UIRefreshControl!
     var timer: NSTimer!
@@ -143,7 +149,7 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
             }
         }
         checkedItems.sortInPlace({(item1: GroceryItem, item2: GroceryItem) -> Bool in item1.name < item2.name})
-        doneButton.enabled = (!hasSearched && checkedItems.count > 0 && !isLoading)
+        doneButton.enabled = (!hasSearched && checkedItems.count > 0 && !isLoading && hasLocation)
     }
     
     func removeCheckedItem(target: GroceryItem) {
@@ -169,7 +175,7 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
         var count = 0
         for item in searchArray {
             if item.category == categories[section] {
-                count++
+                count += 1
             }
         }
         return count
@@ -383,8 +389,14 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
                     if self.isManager {
                         let stores = dictionary!["stores"] as? [AnyObject]
                         if stores?.count != 0 {
-                            let store = stores?[0]["data"] as? [String: AnyObject]
+                            let store = stores?[0] as? [String: AnyObject]
+                            self.storeId = store?["id"] as? Int
                             self.storeName = store?["name"] as? String
+                            let address = store?["address"] as? [String: AnyObject]
+                            self.storeStreet = address?["street"] as? String
+                            self.storeCity = address?["city"] as? String
+                            self.storeState = address?["state"] as? String
+                            self.storeZip = address?["zip"] as? String
                         }
                     }
                     dispatch_async(dispatch_get_main_queue()) {
@@ -721,7 +733,7 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
     func startRefresh() {
         getLocation()
         getToken()
-        timer = NSTimer.scheduledTimerWithTimeInterval(1.0, target: self, selector: "endRefresh", userInfo: nil, repeats: true)
+        timer = NSTimer.scheduledTimerWithTimeInterval(1.0, target: self, selector: #selector(GroceryListViewController.endRefresh), userInfo: nil, repeats: true)
     }
     
     func endRefresh() {
@@ -751,6 +763,7 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
             let navigationController = segue.destinationViewController as! UINavigationController
             let controller = navigationController.topViewController as! RoutePreviewViewController
             controller.delegate = self
+            controller.myGPS = newLocation!
         } else if segue.identifier == "editCategory" {
             let title = sender as! String
             let navigationController = segue.destinationViewController as! UINavigationController
@@ -761,7 +774,12 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
             let navigationController = segue.destinationViewController as! UINavigationController
             let controller = navigationController.topViewController as! ManagerViewController
             controller.delegate = self
+            controller.Id = storeId
             controller.Name = storeName
+            controller.StreetAddress = storeStreet
+            controller.City = storeCity
+            controller.State = storeState
+            controller.Zip = storeZip
             controller.Phone = phone
             controller.token = token
             controller.serverUrl = serverUrl
@@ -851,7 +869,7 @@ extension GroceryListViewController: UITableViewDataSource {
             cell.textLabel!.text = checkedItems[position].name
             cell.accessoryType = .Checkmark
         }
-        doneButton.enabled = (!hasSearched && checkedItems.count > 0 && !isLoading)
+        doneButton.enabled = (!hasSearched && checkedItems.count > 0 && !isLoading && hasLocation)
         return cell
     }
     
@@ -929,11 +947,14 @@ extension GroceryListViewController: UITableViewDelegate {
 extension GroceryListViewController: CLLocationManagerDelegate {
     
     func locationManager(manager: CLLocationManager, didFailWithError error: NSError) {
-        print("locationManager didFailWithError \(error)")
+        if error.code != 0 && error.domain != "kCLErrorDomain" {
+            print("locationManager didFailWithError \(error)")
+        }
     }
     
     func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         newLocation = locations.last!
+        hasLocation = true
         stopUpdatingLocation()
     }
     
