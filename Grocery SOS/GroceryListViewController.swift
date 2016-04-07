@@ -29,16 +29,9 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
     let serverUrl = "https://grocery-sos.herokuapp.com"
     var username: String?
     var password: String?
-    var email: String?
-    var phone: String?
+    var user: User?
     var token: String!
-    var isManager = false
-    var storeId: Int?
-    var storeName: String?
-    var storeStreet: String?
-    var storeCity: String?
-    var storeState: String?
-    var storeZip: String?
+    var store: Store?
     let locationManager = CLLocationManager()
     var newLocation: CLLocation?
     var hasLocation = false
@@ -55,7 +48,7 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
         refreshControl = UIRefreshControl()
         searchTable.addSubview(refreshControl)
         doneButton.enabled = false
-        managerButton.enabled = isManager
+        managerButton.enabled = false
         logButton.enabled = false
         profileButton.enabled = false
         loadLoginData()
@@ -289,7 +282,8 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
             let category1 = item["category"] as! Int
             let category = categoriesList[category1]!
             let descript = item["description"] as! String
-            items.append(GroceryItem(name: name, category: category, descript: descript))
+            let id = item["id"] as! Int
+            items.append(GroceryItem(name: name, category: category, descript: descript, id: id))
         }
         items.sortInPlace({(item1: GroceryItem, item2: GroceryItem) -> Bool in item1.name < item2.name})
     }
@@ -383,20 +377,22 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
             } else if let httpResponse = response as? NSHTTPURLResponse where httpResponse.statusCode == 200 {
                 if let data = data {
                     let dictionary = self.parseJSON(data)
-                    self.email = dictionary!["email"] as? String
-                    self.phone = dictionary!["phone"] as? String
-                    self.isManager = dictionary!["isManager"] as! Bool
-                    if self.isManager {
+                    let email = dictionary!["email"] as! String
+                    let phone = dictionary!["phone"] as! String
+                    let isManager = dictionary!["isManager"] as! Bool
+                    self.user = User(username: self.username!, email: email, phone: phone, isManager: isManager)
+                    if self.user!.isManager {
                         let stores = dictionary!["stores"] as? [AnyObject]
                         if stores?.count != 0 {
                             let store = stores?[0] as? [String: AnyObject]
-                            self.storeId = store?["id"] as? Int
-                            self.storeName = store?["name"] as? String
+                            let storeId = store?["id"] as! Int
+                            let storeName = store?["name"] as! String
                             let address = store?["address"] as? [String: AnyObject]
-                            self.storeStreet = address?["street"] as? String
-                            self.storeCity = address?["city"] as? String
-                            self.storeState = address?["state"] as? String
-                            self.storeZip = address?["zip"] as? String
+                            let storeStreet = address?["street"] as! String
+                            let storeCity = address?["city"] as! String
+                            let storeState = address?["state"] as! String
+                            let storeZip = address?["zip"] as! String
+                            self.store = Store(id: storeId, name: storeName, street: storeStreet, city: storeCity, state: storeState, zip: storeZip)
                         }
                     }
                     dispatch_async(dispatch_get_main_queue()) {
@@ -606,7 +602,7 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
                         self.logButton.enabled = true
                         self.profileButton.enabled = true
                         self.searchTable.reloadData()
-                        self.managerButton.enabled = self.isManager
+                        self.managerButton.enabled = self.user!.isManager
                     }
                     return
                 }
@@ -774,14 +770,9 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
             let navigationController = segue.destinationViewController as! UINavigationController
             let controller = navigationController.topViewController as! ManagerViewController
             controller.delegate = self
-            controller.Id = storeId
-            controller.Name = storeName
-            controller.StreetAddress = storeStreet
-            controller.City = storeCity
-            controller.State = storeState
-            controller.Zip = storeZip
-            controller.Phone = phone
+            controller.user = user!
             controller.token = token
+            controller.store = store!
             controller.serverUrl = serverUrl
             controller.categoriesList = categoriesList
         } else if segue.identifier == "profile" {
@@ -790,9 +781,7 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
             controller.delegate = self
             controller.username = username!
             controller.password = password!
-            controller.email = email!
-            controller.phone = phone!
-            controller.isManager = isManager
+            controller.user = user!
         } else if segue.identifier == "login" {
             let navigationController = segue.destinationViewController as! UINavigationController
             let controller = navigationController.topViewController as! LoginViewController

@@ -26,13 +26,8 @@ class ManagerViewController: UIViewController, ManagerModifyViewControllerDelega
     var inventory = [GroceryItem]()
     var categories = [String]()
     var token: String!
-    var Id: Int?
-    var Name: String?
-    var Phone: String?
-    var StreetAddress: String?
-    var City: String?
-    var State: String?
-    var Zip: String?
+    var user: User!
+    var store: Store!
     var serverUrl: String!
     var isLoading = false
     
@@ -50,33 +45,12 @@ class ManagerViewController: UIViewController, ManagerModifyViewControllerDelega
         
         self.automaticallyAdjustsScrollViewInsets = false
         
-        if information.count == 0 {
-            information["Name"] = "BLANK"
-            information["Phone"] = "BLANK"
-            information["Street Address"] = "BLANK"
-            information["City"] = "BLANK"
-            information["State"] = "BLANK"
-            information["Zip"] = "BLANK"
-        }
-        
-        if let Name = Name {
-            information["Name"] = Name
-        }
-        if let Phone = Phone {
-            information["Phone"] = Phone
-        }
-        if let StreetAddress = StreetAddress {
-            information["Street Address"] = StreetAddress
-        }
-        if let City = City {
-            information["City"] = City
-        }
-        if let State = State {
-            information["State"] = State
-        }
-        if let Zip = Zip {
-            information["Zip"] = Zip
-        }
+        information["Name"] = store.name
+        information["Phone"] = user.phone
+        information["Street Address"] = store.street
+        information["City"] = store.city
+        information["State"] = store.state
+        information["Zip"] = store.zip
         itemGetAll()
 
         // Do any additional setup after loading the view.
@@ -109,8 +83,7 @@ class ManagerViewController: UIViewController, ManagerModifyViewControllerDelega
         if !controller.addItem {
             information[controller.field] = controller.entry
         } else {
-            let newItem = GroceryItem(name: controller.entry, category: controller.category!, descript: controller.descript)
-            itemCreate(newItem)
+            itemCreate(controller.entry, descript: controller.descript, category: controller.category!)
         }
         tableView.reloadData()
     }
@@ -191,7 +164,8 @@ class ManagerViewController: UIViewController, ManagerModifyViewControllerDelega
             let category1 = item["category"] as! Int
             let category = categoriesList[category1]!
             let descript = item["description"] as! String
-            inventory.append(GroceryItem(name: name, category: category, descript: descript))
+            let id = item["id"] as! Int
+            inventory.append(GroceryItem(name: name, category: category, descript: descript, id: id))
         }
         inventory.sortInPlace({(item1: GroceryItem, item2: GroceryItem) -> Bool in item1.name < item2.name})
     }
@@ -215,7 +189,7 @@ class ManagerViewController: UIViewController, ManagerModifyViewControllerDelega
     func itemGetAll() {
         isLoading = true
         tableView.reloadData()
-        let url: NSURL! = NSURL(string: "\(serverUrl)/api/manager/\(Id!)/items")
+        let url: NSURL! = NSURL(string: "\(serverUrl)/api/manager/\(store.id)/items")
         let request = NSMutableURLRequest(URL: url)
         request.HTTPMethod = "GET"
         request.addValue("JWT \(token)", forHTTPHeaderField: "Authorization")
@@ -249,7 +223,7 @@ class ManagerViewController: UIViewController, ManagerModifyViewControllerDelega
         task.resume()
     }
     
-    func itemCreate(newItem: GroceryItem) {
+    func itemCreate(name: String, descript: String, category: String) {
         isLoading = true
         tableView.reloadData()
         let url: NSURL! = NSURL(string: "\(serverUrl)/api/item/create")
@@ -257,7 +231,7 @@ class ManagerViewController: UIViewController, ManagerModifyViewControllerDelega
         request.HTTPMethod = "POST"
         request.addValue("JWT \(token)", forHTTPHeaderField: "Authorization")
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        let parameters: [String: String] = ["name": "\(newItem.name)", "description": "\(newItem.descript)", "category": "\(newItem.category)", "store": "\(information["Name"]!)"]
+        let parameters: [String: String] = ["name": "\(name)", "description": "\(descript)", "category": "\(category)", "store": "\(information["Name"]!)"]
         do {
             try request.HTTPBody = NSJSONSerialization.dataWithJSONObject(parameters, options: [])
         } catch {
@@ -271,11 +245,16 @@ class ManagerViewController: UIViewController, ManagerModifyViewControllerDelega
                 print("itemCreate Error \(error)")
                 return
             } else if let httpResponse = response as? NSHTTPURLResponse where httpResponse.statusCode == 200 {
-                dispatch_async(dispatch_get_main_queue()) {
-                    self.isLoading = false
-                    self.inventory.append(newItem)
-                    self.inventory.sortInPlace({(item1: GroceryItem, item2: GroceryItem) -> Bool in item1.name < item2.name})
-                    self.tableView.reloadData()
+                if let data = data {
+                    let dictionary = self.parseJSON(data);
+                    let id = dictionary!["item"] as! Int
+                    let newItem = GroceryItem(name: name, category: category, descript: descript, id: id)
+                    dispatch_async(dispatch_get_main_queue()) {
+                        self.isLoading = false
+                        self.inventory.append(newItem)
+                        self.inventory.sortInPlace({(item1: GroceryItem, item2: GroceryItem) -> Bool in item1.name < item2.name})
+                        self.tableView.reloadData()
+                    }
                 }
                 return
             } else {

@@ -14,12 +14,14 @@ class GroceryItem: NSObject, NSCoding {
     var checkmark: Bool = false
     var category: String = ""
     var descript: String = ""
+    var id = Int()
     
-    init(name: String, checkmark: Bool = false, category: String = "Miscellaneous", descript: String = "") {
+    init(name: String, checkmark: Bool = false, category: String = "Miscellaneous", descript: String = "", id: Int) {
         self.name = name
         self.checkmark = checkmark
         self.category = category
         self.descript = descript
+        self.id = id
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -27,6 +29,7 @@ class GroceryItem: NSObject, NSCoding {
         checkmark = aDecoder.decodeObjectForKey("checkmark") as! Bool
         category = aDecoder.decodeObjectForKey("category") as! String
         descript = aDecoder.decodeObjectForKey("descript") as! String
+        id = aDecoder.decodeObjectForKey("id") as! Int
         super.init()
     }
     
@@ -35,6 +38,7 @@ class GroceryItem: NSObject, NSCoding {
         aCoder.encodeObject(checkmark, forKey: "checkmark")
         aCoder.encodeObject(category, forKey: "category")
         aCoder.encodeObject(descript, forKey: "descript")
+        aCoder.encodeObject(id, forKey: "id")
     }
     
 }

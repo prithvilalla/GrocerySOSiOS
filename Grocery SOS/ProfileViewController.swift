@@ -25,16 +25,14 @@ class ProfileViewController: UIViewController, changePasswordViewControllerDeleg
     weak var delegate: ProfileViewControllerDelegate?
     var username: String!
     var password: String!
-    var email: String!
-    var phone: String!
-    var isManager: Bool!
+    var user: User!
 
     override func viewDidLoad() {
         super.viewDidLoad()
         usernameTextField.text = username
-        emailTextField.text = email
-        phoneTextField.text = phone
-        storeManagerSwitch.on = isManager
+        emailTextField.text = user.email
+        phoneTextField.text = user.phone
+        storeManagerSwitch.on = user.isManager
         usernameTextField.becomeFirstResponder()
         // Do any additional setup after loading the view.
     }
