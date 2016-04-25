@@ -18,12 +18,10 @@ class RoutePreviewViewController: UIViewController {
     weak var delegate: RoutePreviewViewControllerDelegate?
     @IBOutlet weak var routeTable: UITableView!
     @IBOutlet weak var mapView: GMSMapView!
-    var stores = [String]()
+    var stores: [Store]!
     var myGPS: CLLocation!
     
     required init?(coder aDecoder: NSCoder) {
-        stores.append("Publix")
-        stores.append("Ace Hardware")
         super.init(coder: aDecoder)
     }
 
@@ -33,22 +31,19 @@ class RoutePreviewViewController: UIViewController {
         self.automaticallyAdjustsScrollViewInsets = false
         
         let latitude = myGPS.coordinate.latitude
-        let longitutde = myGPS.coordinate.longitude
+        let longitude = myGPS.coordinate.longitude
         
-        let camera = GMSCameraPosition.cameraWithLatitude(latitude, longitude: longitutde, zoom: 10)
+        let camera = GMSCameraPosition.cameraWithLatitude(latitude, longitude: longitude, zoom: 12)
         mapView.camera = camera
         mapView.myLocationEnabled = true
         mapView.settings.myLocationButton = true
         
-        let publix = GMSMarker()
-        publix.position = CLLocationCoordinate2DMake(33.780385, -84.388703)
-        publix.title = "Publix"
-        publix.map = mapView
-        
-        let hardware = GMSMarker()
-        hardware.position = CLLocationCoordinate2DMake(33.778175, -84.382995)
-        hardware.title = "Ace Hardware"
-        hardware.map = mapView
+        for store in stores {
+            let mapStore = GMSMarker()
+            mapStore.position = CLLocationCoordinate2DMake(Double(store.lat)!, Double(store.lng)!)
+            mapStore.title = store.name
+            mapStore.map = mapView
+        }
         
         // Do any additional setup after loading the view.
     }
@@ -64,7 +59,8 @@ class RoutePreviewViewController: UIViewController {
     
     @IBAction func navigate() {
         if (UIApplication.sharedApplication().canOpenURL(NSURL(string:"comgooglemaps://")!)) {
-            UIApplication.sharedApplication().openURL(NSURL(string:"comgooglemaps://?saddr=Current+Location&daddr=33.780385,-84.388703&directionsmode=driving")!)
+            performSegueWithIdentifier("navigate", sender: nil)
+            UIApplication.sharedApplication().openURL(NSURL(string:"comgooglemaps://?saddr=Current+Location&daddr=\(stores[0].lat),\(stores[0].lng)&directionsmode=driving")!)
         } else {
             print("Can't use comgooglemaps://");
         }
@@ -111,7 +107,7 @@ extension RoutePreviewViewController: UITableViewDataSource {
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cellIdentifier = "TableViewCell"
         let cell: UITableViewCell! = tableView.dequeueReusableCellWithIdentifier(cellIdentifier)
-        cell.textLabel!.text = "\(indexPath.row + 1). \(stores[indexPath.row])"
+        cell.textLabel!.text = "\(indexPath.row + 1). \(stores[indexPath.row].name)"
         return cell
     }
     

@@ -11,6 +11,7 @@ import UIKit
 protocol ProfileViewControllerDelegate: class {
     func profileViewControllerCancel(controller: ProfileViewController)
     func profileViewControllerSave(controller: ProfileViewController)
+    func profileViewControllerDelete(controller: ProfileViewController)
 }
 
 class ProfileViewController: UIViewController, changePasswordViewControllerDelegate {
@@ -50,10 +51,14 @@ class ProfileViewController: UIViewController, changePasswordViewControllerDeleg
         delegate?.profileViewControllerSave(self)
     }
     
+    @IBAction func delete() {
+        delegate?.profileViewControllerDelete(self)
+    }
+    
     @IBAction func changePassword() {
         performSegueWithIdentifier("changePassword", sender: nil)
     }
-    
+        
     func changePasswordViewControllerCancel(controller: ChangePasswordViewController) {
         dismissViewControllerAnimated(true, completion: nil)
     }

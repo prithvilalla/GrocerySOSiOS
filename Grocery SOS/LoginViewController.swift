@@ -12,7 +12,7 @@ protocol LoginViewControllerDelegate: class {
     func loginViewControllerLogin(controller: LoginViewController)
 }
 
-class LoginViewController: UIViewController {
+class LoginViewController: UIViewController, NewUserTableViewControllerDelegate {
     
     @IBOutlet weak var usernameTextField: UITextField!
     @IBOutlet weak var passwordTextField: UITextField!
@@ -35,6 +35,10 @@ class LoginViewController: UIViewController {
     
     @IBAction func login() {
         getToken()
+    }
+    
+    @IBAction func newUser() {
+        performSegueWithIdentifier("newUser", sender: nil)
     }
     
     func showLoginError() {
@@ -80,6 +84,17 @@ class LoginViewController: UIViewController {
         task.resume()
     }
     
+    func newUserTableViewControllerCancel(controller: NewUserTableViewController) {
+        dismissViewControllerAnimated(true, completion: nil)
+    }
+    
+    func newUserTableViewControllerSave(controller: NewUserTableViewController) {
+        dismissViewControllerAnimated(true, completion: nil)
+        usernameTextField.text = controller.username.text!
+        passwordTextField.text = controller.password1.text!
+        getToken()
+    }
+    
 
     /*
     // MARK: - Navigation
@@ -90,6 +105,14 @@ class LoginViewController: UIViewController {
         // Pass the selected object to the new view controller.
     }
     */
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if segue.identifier == "newUser" {
+            let navigationController = segue.destinationViewController as! UINavigationController
+            let controller = navigationController.topViewController as! NewUserTableViewController
+            controller.delegate = self
+        }
+    }
 
 }
 

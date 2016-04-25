@@ -16,6 +16,8 @@ class Store: NSObject, NSCoding {
     var city = String()
     var state = String()
     var zip = String()
+    var lat = String()
+    var lng = String()
     
     init(id: Int, name: String, street: String, city: String, state: String, zip: String) {
         self.id = id
@@ -33,6 +35,8 @@ class Store: NSObject, NSCoding {
         city = aDecoder.decodeObjectForKey("city") as! String
         state = aDecoder.decodeObjectForKey("state") as! String
         zip = aDecoder.decodeObjectForKey("zip") as! String
+        lat = aDecoder.decodeObjectForKey("lat") as! String
+        lng = aDecoder.decodeObjectForKey("lng") as! String
         super.init()
     }
     
@@ -43,6 +47,12 @@ class Store: NSObject, NSCoding {
         aCoder.encodeObject(city, forKey: "city")
         aCoder.encodeObject(state, forKey: "state")
         aCoder.encodeObject(zip, forKey: "zip")
+        aCoder.encodeObject(lat, forKey: "lat")
+        aCoder.encodeObject(lng, forKey: "lng")
     }
     
+}
+
+func == (lhs: Store, rhs: Store ) -> Bool {
+    return lhs.name == rhs.name
 }

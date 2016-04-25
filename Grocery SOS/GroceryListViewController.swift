@@ -9,7 +9,7 @@
 import UIKit
 import CoreLocation
 
-class GroceryListViewController: UIViewController, RoutePreviewViewControllerDelegate, CategoryPreferenceViewControllerDelegate, ManagerViewControllerDelegate, ProfileViewControllerDelegate, LoginViewControllerDelegate {
+class GroceryListViewController: UIViewController, RoutePreviewViewControllerDelegate, ItemPreferenceViewControllerDelegate, ManagerViewControllerDelegate, ProfileViewControllerDelegate, LoginViewControllerDelegate {
     
     @IBOutlet weak var searchBar: UISearchBar!
     @IBOutlet weak var searchTable: UITableView!
@@ -22,6 +22,8 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
     var items = [GroceryItem]()
     var searchResults = [GroceryItem]()
     var checkedItems = [GroceryItem]()
+    var storeArray = [Store]()
+    var preferredStore: Store?
     var categories = [String]()
     var hasSearched = false
     let emptySearchMessage = "(Nothing found)"
@@ -31,7 +33,7 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
     var password: String?
     var user: User?
     var token: String!
-    var store: Store?
+    var myStore: Store?
     let locationManager = CLLocationManager()
     var newLocation: CLLocation?
     var hasLocation = false
@@ -78,6 +80,10 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
     
     @IBAction func clearGroceryItem(sender: UIBarButtonItem) {
         resetGroceryItem()
+    }
+    
+    @IBAction func done() {
+        listRoute()
     }
     
     func resetGroceryItem() {
@@ -185,15 +191,33 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
         return positions[indexPath.row]
     }
     
+    func itemForPosition(searchArray: [GroceryItem], indexPath: NSIndexPath) -> GroceryItem? {
+        let category = categories[indexPath.section]
+        var counter = 0
+        for i in 0...(searchArray.count - 1) {
+            if category == searchArray[i].category {
+                if counter == indexPath.row {
+                    return searchArray[i]
+                }
+                counter = counter + 1
+            }
+        }
+        return nil
+    }
+    
     func routePreviewViewControllerDidCancel(controller: RoutePreviewViewController) {
         dismissViewControllerAnimated(true, completion: nil)
     }
     
-    func categoryPreferenceViewControllerCancel(controller: CategoryPreferenceViewController) {
+    func itemPreferenceViewControllerCancel(controller: ItemPreferenceViewController) {
         dismissViewControllerAnimated(true, completion: nil)
     }
     
-    func categoryPreferenceViewControllerSave(controller: CategoryPreferenceViewController) {
+    func itemPreferenceViewControllerSave(controller: ItemPreferenceViewController) {
+        let item = controller.item
+        let store = controller.selected!
+        let saveAsDefault = controller.setDefault.on
+        itemSetStore(item, store: store, setAsDefault: saveAsDefault)
         dismissViewControllerAnimated(true, completion: nil)
     }
     
@@ -214,13 +238,11 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
     
     func managerViewControllerBack(controller: ManagerViewController) {
         dismissViewControllerAnimated(true, completion: nil)
-        itemGetAll()
     }
     
     func profileViewControllerCancel(controller: ProfileViewController) {
         dismissViewControllerAnimated(true, completion: nil)
     }
-    
     
     func profileViewControllerSave(controller: ProfileViewController) {
         dismissViewControllerAnimated(true, completion: nil)
@@ -236,13 +258,20 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
         }
     }
     
-    func loginViewControllerLogin(controller: LoginViewController) {
+    func profileViewControllerDelete(controller: ProfileViewController) {
         dismissViewControllerAnimated(true, completion: nil)
+        if user?.isManager == true {
+            managerDeleteStore()
+        } else {
+            userDelete()
+        }
+    }
+    
+    func loginViewControllerLogin(controller: LoginViewController) {
         username = controller.username!
         password = controller.password!
         saveLoginData()
-        getLocation()
-        getToken()
+        dismissViewControllerAnimated(true, completion: nil)
     }
     
     func documentsDirectory() -> String {
@@ -392,7 +421,7 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
                             let storeCity = address?["city"] as! String
                             let storeState = address?["state"] as! String
                             let storeZip = address?["zip"] as! String
-                            self.store = Store(id: storeId, name: storeName, street: storeStreet, city: storeCity, state: storeState, zip: storeZip)
+                            self.myStore = Store(id: storeId, name: storeName, street: storeStreet, city: storeCity, state: storeState, zip: storeZip)
                         }
                     }
                     dispatch_async(dispatch_get_main_queue()) {
@@ -496,6 +525,81 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
         task.resume()
     }
     
+    func userDelete() {
+        isLoading = true
+        searchTable.reloadData()
+        let url: NSURL! = NSURL(string: "\(serverUrl)/api/user/delete")
+        let request = NSMutableURLRequest(URL: url)
+        request.HTTPMethod = "POST"
+        request.addValue("JWT \(token)", forHTTPHeaderField: "Authorization")
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        let session = NSURLSession.sharedSession()
+        let task = session.dataTaskWithRequest(request, completionHandler: {data, response, error in
+            if let error = error {
+                self.isLoading = false
+                self.searchTable.reloadData()
+                print("userDelete Error \(error)")
+                return
+            } else if let httpResponse = response as? NSHTTPURLResponse where httpResponse.statusCode == 200 {
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.username = nil
+                    self.password = nil
+                    self.saveLoginData()
+                    self.performSegueWithIdentifier("login", sender: nil)
+                }
+                return
+            } else {
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.isLoading = false
+                    self.searchTable.reloadData()
+                    self.showNetworkError()
+                    print("userDelete Failure \(response)")
+                }
+                return
+            }
+        })
+        task.resume()
+    }
+    
+    func managerDeleteStore() {
+        isLoading = true
+        searchTable.reloadData()
+        let url: NSURL! = NSURL(string: "\(serverUrl)/api/manager/deleteStore")
+        let request = NSMutableURLRequest(URL: url)
+        request.HTTPMethod = "POST"
+        request.addValue("JWT \(token)", forHTTPHeaderField: "Authorization")
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        let parameters: [String: Int] = ["store": myStore!.id]
+        do {
+            try request.HTTPBody = NSJSONSerialization.dataWithJSONObject(parameters, options: [])
+        } catch {
+            print("Error HTTP POST Body")
+        }
+        let session = NSURLSession.sharedSession()
+        let task = session.dataTaskWithRequest(request, completionHandler: {data, response, error in
+            if let error = error {
+                self.isLoading = false
+                self.searchTable.reloadData()
+                print("managerDeleteStore Error \(error)")
+                return
+            } else if let httpResponse = response as? NSHTTPURLResponse where httpResponse.statusCode == 200 {
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.userDelete()
+                }
+                return
+            } else {
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.isLoading = false
+                    self.searchTable.reloadData()
+                    self.showNetworkError()
+                    print("managerDeleteStore Failure \(response)")
+                }
+                return
+            }
+        })
+        task.resume()
+    }
+    
     func categoryGetAll() {
         isLoading = true
         searchTable.reloadData()
@@ -567,6 +671,98 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
                     self.searchTable.reloadData()
                     self.showNetworkError()
                     print("itemGetAll Failure \(response)")
+                }
+                return
+            }
+        })
+        task.resume()
+    }
+    
+    func itemStores(item: GroceryItem) {
+        isLoading = true
+        searchTable.reloadData()
+        storeArray.removeAll(keepCapacity: false)
+        let url: NSURL! = NSURL(string: "\(serverUrl)/api/item/\(item.id)/stores")
+        let request = NSMutableURLRequest(URL: url)
+        request.HTTPMethod = "GET"
+        request.addValue("JWT \(token)", forHTTPHeaderField: "Authorization")
+        let session = NSURLSession.sharedSession()
+        let task = session.dataTaskWithRequest(request, completionHandler: {data, response, error in
+            if let error = error {
+                self.isLoading = false
+                self.searchTable.reloadData()
+                print("itemStores Error \(error)")
+                return
+            } else if let httpResponse = response as? NSHTTPURLResponse where httpResponse.statusCode == 200 {
+                if let data = data {
+                    let dictionary = self.parseJSON(data)
+                    if let storeObj = dictionary!["preferred"] as? [String: AnyObject] {
+                        let id = storeObj["id"] as! Int
+                        let name = storeObj["name"] as! String
+                        self.preferredStore = Store(id: id, name: name, street: "", city: "", state: "", zip: "")
+                    } else {
+                        self.preferredStore = nil
+                    }
+                    let storeList = dictionary!["stores"] as! [AnyObject]
+                    for value in storeList {
+                        let storeObj = value as! [String: AnyObject]
+                        let id = storeObj["id"] as! Int
+                        let name = storeObj["name"] as! String
+                        self.storeArray.append(Store(id: id, name: name, street: "", city: "", state: "", zip: ""))
+                    }
+                    dispatch_async(dispatch_get_main_queue()) {
+                        self.isLoading = false
+                        self.searchTable.reloadData()
+                        self.performSegueWithIdentifier("editItem", sender: item)
+                    }
+                    return
+                }
+            } else {
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.isLoading = false
+                    self.searchTable.reloadData()
+                    self.showNetworkError()
+                    print("itemStores Failure \(response)")
+                }
+                return
+            }
+        })
+        task.resume()
+    }
+    
+    func itemSetStore(item: GroceryItem, store: Store, setAsDefault: Bool) {
+        isLoading = true
+        searchTable.reloadData()
+        let url: NSURL! = NSURL(string: "\(serverUrl)/api/item/setStore")
+        let request = NSMutableURLRequest(URL: url)
+        request.HTTPMethod = "POST"
+        request.addValue("JWT \(token)", forHTTPHeaderField: "Authorization")
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        let parameters: [String: AnyObject] = ["item": item.id, "store": store.id, "setAsDefault": setAsDefault]
+        do {
+            try request.HTTPBody = NSJSONSerialization.dataWithJSONObject(parameters, options: [])
+        } catch {
+            print("Error HTTP POST Body")
+        }
+        let session = NSURLSession.sharedSession()
+        let task = session.dataTaskWithRequest(request, completionHandler: {data, response, error in
+            if let error = error {
+                self.isLoading = false
+                self.searchTable.reloadData()
+                print("itemSetStore Error \(error)")
+                return
+            } else if let httpResponse = response as? NSHTTPURLResponse where httpResponse.statusCode == 200 {
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.isLoading = false
+                    self.searchTable.reloadData()
+                }
+                return
+            } else {
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.isLoading = false
+                    self.searchTable.reloadData()
+                    self.showNetworkError()
+                    print("itemSetStore Failure \(response)")
                 }
                 return
             }
@@ -699,6 +895,59 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
         task.resume()
     }
 
+    func listRoute() {
+        storeArray.removeAll(keepCapacity: false)
+        isLoading = true
+        searchTable.reloadData()
+        let url: NSURL! = NSURL(string: "\(serverUrl)/api/list/route?latitude=\(newLocation!.coordinate.latitude)&longitude=\(newLocation!.coordinate.longitude)")
+        let request = NSMutableURLRequest(URL: url)
+        request.HTTPMethod = "GET"
+        request.addValue("JWT \(token)", forHTTPHeaderField: "Authorization")
+        let session = NSURLSession.sharedSession()
+        let task = session.dataTaskWithRequest(request, completionHandler: {data, response, error in
+            if let error = error {
+                self.isLoading = false
+                self.searchTable.reloadData()
+                print("listRoute Error \(error)")
+                return
+            } else if let httpResponse = response as? NSHTTPURLResponse where httpResponse.statusCode == 200 {
+                if let data = data {
+                    let dictionary = self.parseJSON(data)
+                    let storeList = dictionary!["stores"] as! [AnyObject]
+                    for value in storeList {
+                        let id = value["id"] as! Int
+                        let name = value["name"] as! String
+                        let address = value["address"] as! [String: AnyObject]
+                        let street = address["street"] as! String
+                        let city = address["city"] as! String
+                        let state = address["state"] as! String
+                        let zip = address["zip"] as! String
+                        let lat = address["lat"] as! String
+                        let long = address["lng"] as! String
+                        let store = Store(id: id, name: name, street: street, city: city, state: state, zip: zip)
+                        store.lat = lat
+                        store.lng = long
+                        self.storeArray.append(store)
+                    }
+                    dispatch_async(dispatch_get_main_queue()) {
+                        self.isLoading = false
+                        self.searchTable.reloadData()
+                        self.performSegueWithIdentifier("routePreview", sender: nil)
+                    }
+                    return
+                }
+            } else {
+                self.isLoading = false
+                self.searchTable.reloadData()
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.showNetworkError()
+                    print("listRoute Failure \(response)")
+                }
+                return
+            }
+        })
+        task.resume()
+    }
     
     func getLocation() {
         let authStatus = CLLocationManager.authorizationStatus()
@@ -743,16 +992,6 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
             startRefresh()
         }
     }
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
-    }
-    */
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if segue.identifier == "routePreview" {
@@ -760,19 +999,22 @@ class GroceryListViewController: UIViewController, RoutePreviewViewControllerDel
             let controller = navigationController.topViewController as! RoutePreviewViewController
             controller.delegate = self
             controller.myGPS = newLocation!
-        } else if segue.identifier == "editCategory" {
-            let title = sender as! String
+            controller.stores = storeArray
+        } else if segue.identifier == "editItem" {
+            let item = sender as! GroceryItem
             let navigationController = segue.destinationViewController as! UINavigationController
-            let controller = navigationController.topViewController as! CategoryPreferenceViewController
+            let controller = navigationController.topViewController as! ItemPreferenceViewController
             controller.delegate = self
-            controller.category = title
+            controller.item = item
+            controller.stores = storeArray
+            controller.current = preferredStore
         } else if segue.identifier == "managerMode" {
             let navigationController = segue.destinationViewController as! UINavigationController
             let controller = navigationController.topViewController as! ManagerViewController
             controller.delegate = self
             controller.user = user!
             controller.token = token
-            controller.store = store!
+            controller.store = myStore!
             controller.serverUrl = serverUrl
             controller.categoriesList = categoriesList
         } else if segue.identifier == "profile" {
@@ -833,32 +1075,42 @@ extension GroceryListViewController: UISearchBarDelegate {
 extension GroceryListViewController: UITableViewDataSource {
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        doneButton.enabled = (!hasSearched && checkedItems.count > 0 && !isLoading && hasLocation)
         let cellIdentifier = isLoading ? "LoadingViewCell" : "TableViewCell"
         let cell: UITableViewCell! = tableView.dequeueReusableCellWithIdentifier(cellIdentifier)
         if isLoading {
             let activityIndicator = cell.viewWithTag(100) as? UIActivityIndicatorView
             activityIndicator?.startAnimating()
+            cell.backgroundColor = UIColor.whiteColor()
+            cell.textLabel!.textColor = UIColor.blackColor()
+            cell.accessoryType = .None
             return cell
         }
         if hasSearched {
             if searchResults.count == 0 {
                 cell.textLabel!.text = emptySearchMessage
+                cell.backgroundColor = UIColor.whiteColor()
+                cell.textLabel!.textColor = UIColor.blackColor()
                 cell.accessoryType = .None
             } else {
                 let position = positionInArray(searchResults, indexPath: indexPath)
                 cell.textLabel!.text = searchResults[position].name
+                cell.accessoryType = .None
                 if searchResults[position].checkmark {
-                    cell.accessoryType = .Checkmark
+                    cell.backgroundColor = UIColor.whiteColor()
+                    cell.textLabel!.textColor = UIColor.blueColor()
                 } else {
-                    cell.accessoryType = .None
+                    cell.backgroundColor = UIColor.whiteColor()
+                    cell.textLabel!.textColor = UIColor.blackColor()
                 }
             }
         } else {
             let position = positionInArray(checkedItems, indexPath: indexPath)
             cell.textLabel!.text = checkedItems[position].name
-            cell.accessoryType = .Checkmark
+            cell.backgroundColor = UIColor.whiteColor()
+            cell.textLabel!.textColor = UIColor.blueColor()
+            cell.accessoryType = .DetailButton
         }
-        doneButton.enabled = (!hasSearched && checkedItems.count > 0 && !isLoading && hasLocation)
         return cell
     }
     
@@ -920,14 +1172,15 @@ extension GroceryListViewController: UITableViewDelegate {
         if categories.count != 0 && !(searchResults.count == 0 && hasSearched) {
             cell.textLabel!.text = categories[section]
             cell.textLabel!.textColor = UIColor.whiteColor()
-            cell.accessoryType = hasSearched ? .None : .DetailDisclosureButton
+            cell.accessoryType = .None
             return cell
         }
         return nil
     }
     
     func tableView(tableView: UITableView, accessoryButtonTappedForRowWithIndexPath indexPath: NSIndexPath) {
-        performSegueWithIdentifier("editCategory", sender: categories[indexPath.section])
+        let item: GroceryItem! = itemForPosition(checkedItems, indexPath: indexPath)
+        itemStores(item)
     }
     
     
