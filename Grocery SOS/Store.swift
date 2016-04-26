@@ -54,5 +54,5 @@ class Store: NSObject, NSCoding {
 }
 
 func == (lhs: Store, rhs: Store ) -> Bool {
-    return lhs.name == rhs.name
+    return lhs.id == rhs.id
 }

@@ -34,15 +34,14 @@ class ItemPreferenceViewController: UIViewController {
         super.viewDidLoad()
         self.title = item.name
         self.automaticallyAdjustsScrollViewInsets = false
-        if selected == nil {
-            saveButton.enabled = false
-        }
+        saveButton.enabled = false
         // Do any additional setup after loading the view.
     }
     
     override func viewWillAppear(animated: Bool) {
         if current != nil {
             selected = current
+            saveButton.enabled = true
         }
     }
 
@@ -76,9 +75,14 @@ extension ItemPreferenceViewController: UITableViewDelegate {
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         if stores.count != 0 {
-            if selected == stores[indexPath.row] {
-                selected = nil
-                saveButton.enabled = false
+            if selected != nil {
+                if selected! == stores[indexPath.row] {
+                    selected = nil
+                    saveButton.enabled = false
+                } else {
+                    selected = stores[indexPath.row]
+                    saveButton.enabled = true
+                }
             } else {
                 selected = stores[indexPath.row]
                 saveButton.enabled = true
@@ -103,15 +107,15 @@ extension ItemPreferenceViewController: UITableViewDataSource {
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cellIdentifier = "TableViewCell"
         let cell: UITableViewCell! = tableView.dequeueReusableCellWithIdentifier(cellIdentifier)
+        cell.accessoryType = .None
         if stores.count == 0 {
             cell.textLabel!.text = errorMessage
-            cell.accessoryType = .None
         } else {
             cell.textLabel!.text = "\(indexPath.row + 1). \(stores[indexPath.row].name)"
-            if selected == stores[indexPath.row] {
-                cell.accessoryType = .Checkmark
-            } else {
-                cell.accessoryType = .None
+            if selected != nil {
+                if selected! == stores[indexPath.row] {
+                    cell.accessoryType = .Checkmark
+                }
             }
         }
         return cell
