@@ -360,12 +360,15 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <searchBar contentMode="redraw" placeholder="Grocery item" showsCancelButton="YES" translatesAutoresizingMaskIntoConstraints="NO" id="LAa-wx-UFE">
-                                <rect key="frame" x="20" y="64" width="560" height="44"/>
+                                <rect key="frame" x="20" y="20" width="560" height="44"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="words" enablesReturnKeyAutomatically="YES"/>
                                 <scopeButtonTitles>
                                     <string>Title</string>
                                     <string>Title</string>
                                 </scopeButtonTitles>
+                                <variation key="widthClass=compact" misplaced="YES">
+                                    <rect key="frame" x="20" y="20" width="560" height="44"/>
+                                </variation>
                                 <connections>
                                     <outlet property="delegate" destination="BYZ-38-t0r" id="xnv-zx-YO1"/>
                                 </connections>
@@ -998,7 +1001,7 @@
                                     </tableViewCell>
                                 </prototypes>
                                 <variation key="widthClass=compact" misplaced="YES">
-                                    <rect key="frame" x="20" y="163" width="560" height="436.5"/>
+                                    <rect key="frame" x="20" y="163" width="560" height="436"/>
                                 </variation>
                                 <connections>
                                     <outlet property="dataSource" destination="SAb-7l-xIe" id="IfN-k0-I69"/>
@@ -1420,75 +1423,102 @@
                                 <rect key="frame" x="-25" y="-30" width="97" height="30"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <textInputTraits key="textInputTraits" enablesReturnKeyAutomatically="YES" secureTextEntry="YES"/>
-                                <variation key="widthClass=compact" misplaced="YES">
-                                    <rect key="frame" x="30" y="110" width="540" height="30"/>
-                                </variation>
                                 <connections>
                                     <outlet property="delegate" destination="NKJ-Kl-G56" id="lc5-Fb-3K6"/>
                                 </connections>
                             </textField>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="bfa_shopping-cart_flat-rounded-square-white-on-black_512x512.png" translatesAutoresizingMaskIntoConstraints="NO" id="C8U-Qs-TPm">
+                                <rect key="frame" x="0.0" y="0.0" width="240" height="128"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="100" id="3BX-k0-B6J"/>
+                                    <constraint firstAttribute="width" constant="100" id="fnf-Dx-yex"/>
+                                </constraints>
+                                <variation key="default">
+                                    <mask key="constraints">
+                                        <exclude reference="3BX-k0-B6J"/>
+                                        <exclude reference="fnf-Dx-yex"/>
+                                    </mask>
+                                </variation>
+                                <variation key="widthClass=compact">
+                                    <mask key="constraints">
+                                        <include reference="3BX-k0-B6J"/>
+                                        <include reference="fnf-Dx-yex"/>
+                                    </mask>
+                                </variation>
+                            </imageView>
                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Username" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="T5g-5P-o84">
                                 <rect key="frame" x="-25" y="-30" width="97" height="30"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" enablesReturnKeyAutomatically="YES"/>
-                                <variation key="widthClass=compact" misplaced="YES">
-                                    <rect key="frame" x="30" y="70" width="540" height="30"/>
-                                </variation>
                                 <connections>
                                     <outlet property="delegate" destination="NKJ-Kl-G56" id="THG-m8-sbg"/>
                                 </connections>
                             </textField>
                         </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
+                            <constraint firstItem="T5g-5P-o84" firstAttribute="top" secondItem="C8U-Qs-TPm" secondAttribute="bottom" constant="10" id="6z6-Ub-O5M"/>
                             <constraint firstAttribute="trailingMargin" secondItem="tKQ-7G-cZ7" secondAttribute="trailing" constant="10" id="7Zk-1f-7l4"/>
+                            <constraint firstItem="C8U-Qs-TPm" firstAttribute="centerX" secondItem="1z9-Wi-izc" secondAttribute="centerX" id="Jr3-Kp-pPu"/>
                             <constraint firstAttribute="trailingMargin" secondItem="T5g-5P-o84" secondAttribute="trailing" constant="10" id="Ulv-dF-GbU"/>
                             <constraint firstItem="tKQ-7G-cZ7" firstAttribute="leading" secondItem="1z9-Wi-izc" secondAttribute="leadingMargin" constant="10" id="ePn-rc-3xL"/>
                             <constraint firstItem="tKQ-7G-cZ7" firstAttribute="top" secondItem="T5g-5P-o84" secondAttribute="bottom" constant="10" id="fDl-1e-MzE"/>
-                            <constraint firstItem="T5g-5P-o84" firstAttribute="top" secondItem="FCI-Oo-Y0V" secondAttribute="bottom" constant="50" id="hJp-pc-KNh"/>
+                            <constraint firstItem="T5g-5P-o84" firstAttribute="centerX" secondItem="1z9-Wi-izc" secondAttribute="centerX" id="mml-pM-PDe"/>
+                            <constraint firstItem="C8U-Qs-TPm" firstAttribute="top" secondItem="FCI-Oo-Y0V" secondAttribute="bottom" constant="10" id="sGa-LP-v3e"/>
                             <constraint firstItem="T5g-5P-o84" firstAttribute="leading" secondItem="1z9-Wi-izc" secondAttribute="leadingMargin" constant="10" id="sNy-2K-3KP"/>
                         </constraints>
                         <variation key="default">
                             <mask key="subviews">
                                 <exclude reference="tKQ-7G-cZ7"/>
+                                <exclude reference="C8U-Qs-TPm"/>
                                 <exclude reference="T5g-5P-o84"/>
                             </mask>
                             <mask key="constraints">
+                                <exclude reference="6z6-Ub-O5M"/>
                                 <exclude reference="Ulv-dF-GbU"/>
-                                <exclude reference="hJp-pc-KNh"/>
+                                <exclude reference="mml-pM-PDe"/>
                                 <exclude reference="sNy-2K-3KP"/>
                                 <exclude reference="7Zk-1f-7l4"/>
                                 <exclude reference="ePn-rc-3xL"/>
                                 <exclude reference="fDl-1e-MzE"/>
+                                <exclude reference="Jr3-Kp-pPu"/>
+                                <exclude reference="sGa-LP-v3e"/>
                             </mask>
                         </variation>
                         <variation key="widthClass=compact">
                             <mask key="subviews">
                                 <include reference="tKQ-7G-cZ7"/>
+                                <include reference="C8U-Qs-TPm"/>
                                 <include reference="T5g-5P-o84"/>
                             </mask>
                             <mask key="constraints">
+                                <include reference="6z6-Ub-O5M"/>
                                 <include reference="Ulv-dF-GbU"/>
-                                <include reference="hJp-pc-KNh"/>
+                                <include reference="mml-pM-PDe"/>
                                 <include reference="sNy-2K-3KP"/>
                                 <include reference="7Zk-1f-7l4"/>
                                 <include reference="ePn-rc-3xL"/>
                                 <include reference="fDl-1e-MzE"/>
+                                <include reference="Jr3-Kp-pPu"/>
+                                <include reference="sGa-LP-v3e"/>
                             </mask>
                         </variation>
                     </view>
                     <navigationItem key="navigationItem" title="Grocery SOS" id="ACe-UC-Pog">
                         <barButtonItem key="leftBarButtonItem" title="Login" id="B40-k5-jVL">
+                            <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             <connections>
                                 <action selector="login" destination="NKJ-Kl-G56" id="d7g-xP-9Dt"/>
                             </connections>
                         </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" title="New User?" id="T8v-Ic-b6J">
+                            <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             <connections>
                                 <action selector="newUser" destination="NKJ-Kl-G56" id="wcX-u2-b8l"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
+                    <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" prompted="NO"/>
                     <connections>
                         <outlet property="passwordTextField" destination="tKQ-7G-cZ7" id="2mZ-1O-TS4"/>
                         <outlet property="usernameTextField" destination="T5g-5P-o84" id="3N4-Ji-JGa"/>
@@ -1767,6 +1797,9 @@
                                                     <rect key="frame" x="-25" y="-30" width="97" height="30"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                     <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" keyboardType="phonePad" returnKeyType="next" enablesReturnKeyAutomatically="YES"/>
+                                                    <variation key="widthClass=compact" misplaced="YES">
+                                                        <rect key="frame" x="57" y="7" width="413.5" height="30"/>
+                                                    </variation>
                                                     <connections>
                                                         <outlet property="delegate" destination="nvw-OR-WNS" id="yHH-ea-gko"/>
                                                     </connections>
@@ -1776,9 +1809,15 @@
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                                     <nil key="highlightedColor"/>
+                                                    <variation key="widthClass=compact" misplaced="YES">
+                                                        <rect key="frame" x="475" y="11" width="67.5" height="21"/>
+                                                    </variation>
                                                 </label>
                                                 <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="Mn7-mb-oDH">
                                                     <rect key="frame" x="-25" y="-15" width="51" height="31"/>
+                                                    <variation key="widthClass=compact" misplaced="YES">
+                                                        <rect key="frame" x="543" y="6" width="51" height="31"/>
+                                                    </variation>
                                                     <connections>
                                                         <action selector="switchToggled" destination="nvw-OR-WNS" eventType="valueChanged" id="mLS-7w-5Jb"/>
                                                     </connections>
@@ -1852,6 +1891,9 @@
                                                     <rect key="frame" x="-25" y="-30" width="97" height="30"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                     <textInputTraits key="textInputTraits" autocapitalizationType="words" autocorrectionType="no" spellCheckingType="no" returnKeyType="next" enablesReturnKeyAutomatically="YES"/>
+                                                    <variation key="widthClass=compact" misplaced="YES">
+                                                        <rect key="frame" x="98" y="7" width="493" height="30"/>
+                                                    </variation>
                                                     <connections>
                                                         <outlet property="delegate" destination="nvw-OR-WNS" id="dJg-8e-bN2"/>
                                                     </connections>
@@ -1909,6 +1951,9 @@
                                                     <rect key="frame" x="-25" y="-30" width="97" height="30"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                     <textInputTraits key="textInputTraits" autocapitalizationType="words" autocorrectionType="no" spellCheckingType="no" returnKeyType="next" enablesReturnKeyAutomatically="YES"/>
+                                                    <variation key="widthClass=compact" misplaced="YES">
+                                                        <rect key="frame" x="54" y="7" width="537" height="30"/>
+                                                    </variation>
                                                     <connections>
                                                         <outlet property="delegate" destination="nvw-OR-WNS" id="QaX-fD-clD"/>
                                                     </connections>
@@ -1966,6 +2011,9 @@
                                                     <rect key="frame" x="-25" y="-30" width="97" height="30"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                     <textInputTraits key="textInputTraits" autocapitalizationType="words" autocorrectionType="no" spellCheckingType="no" returnKeyType="next" enablesReturnKeyAutomatically="YES"/>
+                                                    <variation key="widthClass=compact" misplaced="YES">
+                                                        <rect key="frame" x="38" y="7" width="362.5" height="30"/>
+                                                    </variation>
                                                     <connections>
                                                         <outlet property="delegate" destination="nvw-OR-WNS" id="Ae3-7I-yhY"/>
                                                     </connections>
@@ -1982,7 +2030,8 @@
                                                             <exclude reference="QDA-38-GNW"/>
                                                         </mask>
                                                     </variation>
-                                                    <variation key="widthClass=compact">
+                                                    <variation key="widthClass=compact" misplaced="YES">
+                                                        <rect key="frame" x="507" y="7" width="85" height="30"/>
                                                         <mask key="constraints">
                                                             <include reference="QDA-38-GNW"/>
                                                         </mask>
@@ -1996,6 +2045,9 @@
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                                     <nil key="highlightedColor"/>
+                                                    <variation key="widthClass=compact" misplaced="YES">
+                                                        <rect key="frame" x="482" y="11" width="25" height="21"/>
+                                                    </variation>
                                                 </label>
                                                 <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Oly-Y1-s3o">
                                                     <rect key="frame" x="-25" y="-30" width="97" height="30"/>
@@ -2009,7 +2061,8 @@
                                                             <exclude reference="4Vr-20-7Lt"/>
                                                         </mask>
                                                     </variation>
-                                                    <variation key="widthClass=compact">
+                                                    <variation key="widthClass=compact" misplaced="YES">
+                                                        <rect key="frame" x="447" y="7" width="35" height="30"/>
                                                         <mask key="constraints">
                                                             <include reference="4Vr-20-7Lt"/>
                                                         </mask>
@@ -2023,6 +2076,9 @@
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                                     <nil key="highlightedColor"/>
+                                                    <variation key="widthClass=compact" misplaced="YES">
+                                                        <rect key="frame" x="406" y="11" width="40.5" height="21"/>
+                                                    </variation>
                                                 </label>
                                             </subviews>
                                             <constraints>
@@ -2174,9 +2230,13 @@
             <objects>
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="X5w-le-kZw" sceneMemberID="viewController">
                     <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="L07-gg-cuu">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" translucent="NO" id="L07-gg-cuu">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
+                        <color key="barTintColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                        <textAttributes key="titleTextAttributes">
+                            <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                        </textAttributes>
                     </navigationBar>
                     <nil name="viewControllers"/>
                     <connections>
@@ -2206,6 +2266,9 @@
             <point key="canvasLocation" x="3075" y="-1461"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="bfa_shopping-cart_flat-rounded-square-white-on-black_512x512.png" width="512" height="512"/>
+    </resources>
     <inferredMetricsTieBreakers>
         <segue reference="CdD-vD-DTG"/>
         <segue reference="R7L-zA-dse"/>

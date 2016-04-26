@@ -19,6 +19,7 @@
 		59494F3D1C82B8920085AF62 /* ItemPreferenceViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59494F3C1C82B8920085AF62 /* ItemPreferenceViewController.swift */; };
 		59494F3F1C82E2450085AF62 /* ManagerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59494F3E1C82E2450085AF62 /* ManagerViewController.swift */; };
 		5970CBD21CCD2C2F00CE5C03 /* NewUserTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5970CBD11CCD2C2F00CE5C03 /* NewUserTableViewController.swift */; };
+		5970CBD41CCF274300CE5C03 /* bfa_shopping-cart_flat-rounded-square-white-on-black_512x512.png in Resources */ = {isa = PBXBuildFile; fileRef = 5970CBD31CCF274300CE5C03 /* bfa_shopping-cart_flat-rounded-square-white-on-black_512x512.png */; };
 		5978935B1CA9D8FE00B6D000 /* ProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5978935A1CA9D8FE00B6D000 /* ProfileViewController.swift */; };
 		5978935D1CA9FF4500B6D000 /* ChangePasswordViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5978935C1CA9FF4500B6D000 /* ChangePasswordViewController.swift */; };
 		5978935F1CAA473A00B6D000 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5978935E1CAA473A00B6D000 /* LoginViewController.swift */; };
@@ -42,6 +43,7 @@
 		59494F3C1C82B8920085AF62 /* ItemPreferenceViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ItemPreferenceViewController.swift; sourceTree = "<group>"; };
 		59494F3E1C82E2450085AF62 /* ManagerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ManagerViewController.swift; sourceTree = "<group>"; };
 		5970CBD11CCD2C2F00CE5C03 /* NewUserTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewUserTableViewController.swift; sourceTree = "<group>"; };
+		5970CBD31CCF274300CE5C03 /* bfa_shopping-cart_flat-rounded-square-white-on-black_512x512.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "bfa_shopping-cart_flat-rounded-square-white-on-black_512x512.png"; sourceTree = "<group>"; };
 		5978935A1CA9D8FE00B6D000 /* ProfileViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfileViewController.swift; sourceTree = "<group>"; };
 		5978935C1CA9FF4500B6D000 /* ChangePasswordViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChangePasswordViewController.swift; sourceTree = "<group>"; };
 		5978935E1CAA473A00B6D000 /* LoginViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
@@ -83,6 +85,7 @@
 		59494F231C7D72E80085AF62 /* Grocery SOS */ = {
 			isa = PBXGroup;
 			children = (
+				5970CBD31CCF274300CE5C03 /* bfa_shopping-cart_flat-rounded-square-white-on-black_512x512.png */,
 				59494F241C7D72E80085AF62 /* AppDelegate.swift */,
 				59494F2B1C7D72E80085AF62 /* Assets.xcassets */,
 				59494F2D1C7D72E80085AF62 /* LaunchScreen.storyboard */,
@@ -185,6 +188,7 @@
 			files = (
 				59494F2F1C7D72E80085AF62 /* LaunchScreen.storyboard in Resources */,
 				59494F2C1C7D72E80085AF62 /* Assets.xcassets in Resources */,
+				5970CBD41CCF274300CE5C03 /* bfa_shopping-cart_flat-rounded-square-white-on-black_512x512.png in Resources */,
 				59494F2A1C7D72E80085AF62 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
